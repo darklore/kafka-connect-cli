@@ -37,7 +37,6 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
-	RunE: rootCmdRun,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -82,9 +81,4 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 	}
-}
-
-func rootCmdRun(cmd *cobra.Command, args []string) error {
-	fmt.Println("root called")
-	return nil
 }
