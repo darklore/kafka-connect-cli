@@ -24,6 +24,7 @@ import (
 )
 
 var cfgFile string
+var endpoint string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -53,6 +54,7 @@ func init() {
 	// will be global for your application.
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.kafka-connect-cli.yaml)")
+	rootCmd.PersistentFlags().StringVarP(&endpoint, "endpoint", "e", "http://localhost:8083", "Kafka connect REST endpoint")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.

@@ -52,7 +52,7 @@ func init() {
 }
 
 func clusterCmdRun(cmd *cobra.Command, args []string) error {
-	req, err := http.NewRequest(http.MethodGet, "http://localhost:8083", nil)
+	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	if err != nil {
 		return err
 	}
