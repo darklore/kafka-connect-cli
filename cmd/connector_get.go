@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"encoding/json"
-	"errors"
 	"os"
 
 	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
@@ -10,33 +9,39 @@ import (
 )
 
 // getCmd represents the get command
-var getCmd = &cobra.Command{
-	Use:   "get",
-	Short: "Get information of connector",
-	Args: func(_ *cobra.Command, args []string) error {
-		if len(args) < 1 {
-			return errors.New("requires at least one arg")
-		}
-		return nil
-	},
-	RunE: getCmdDo,
-	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		connectors, err := connect.GetConnectorNames(endpoint)
-		if err != nil {
-			return []string{}, cobra.ShellCompDirectiveNoFileComp
-		}
-
-		return connectors, cobra.ShellCompDirectiveNoFileComp
-	},
-}
+var (
+	getCmd = &cobra.Command{
+		Use:   "get",
+		Short: "Get information of connector",
+		RunE:  getCmdDo,
+	}
+	connectorName string
+)
 
 func init() {
 	connectorCmd.AddCommand(getCmd)
+
+	setConnectorNameFlag(getCmd)
+}
+
+func setConnectorNameFlag(cmd *cobra.Command) error {
+	cmd.Flags().StringVarP(&connectorName, "name", "n", "", "connector name")
+	if err := cmd.MarkFlagRequired("name"); err != nil {
+		return err
+	}
+	cmd.RegisterFlagCompletionFunc("name", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		connectors, err := connect.GetConnectorNames(endpoint)
+		if err != nil {
+			return []string{}, cobra.ShellCompDirectiveError
+		}
+
+		return connectors, cobra.ShellCompDirectiveNoFileComp
+	})
+	return nil
 }
 
 func getCmdDo(_ *cobra.Command, args []string) error {
-	name := args[0]
-	connector, err := connect.GetConnector(endpoint, name)
+	connector, err := connect.GetConnector(endpoint, connectorName)
 	if err != nil {
 		return err
 	}
