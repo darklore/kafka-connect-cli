@@ -37,7 +37,10 @@ to quickly create a Cobra application.`,
 		if err != nil {
 			return err
 		}
-		fmt.Println(connectors)
+
+		for _, c := range connectors {
+			fmt.Println(c)
+		}
 
 		return nil
 	},
