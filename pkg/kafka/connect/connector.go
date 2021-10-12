@@ -23,6 +23,24 @@ type Task struct {
 	ID        int    `json:"task"`
 }
 
+type ConnectorStatus struct {
+	Name  string         `json:"name"`
+	State ConnectorState `json:"connector"`
+}
+
+type ConnectorState struct {
+	State    string      `json:"state"`
+	WorkerID string      `json:"worker_id"`
+	Tasks    []TaskState `json:"tasks"`
+	Type     string      `json:"type"`
+}
+
+type TaskState struct {
+	ID       string `json:"id"`
+	State    string `json:"state"`
+	WorkerID string `json:"worker_id"`
+}
+
 func GetConnectorNames(endpoint string) ([]ConnectorName, error) {
 	u, err := url.Parse(endpoint)
 	if err != nil {
@@ -84,4 +102,25 @@ func GetConnectorConfig(endpoint, name string) (*ConnectorConfig, error) {
 	}
 
 	return &config, nil
+}
+
+func GetConnectorStatus(endpoint, name string) (*ConnectorStatus, error) {
+	u, err := url.Parse(endpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	u.Path = path.Join(u.Path, "connectors", name, "status")
+	resp, err := http.Get(u.String())
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var status ConnectorStatus
+	if err := json.NewDecoder(resp.Body).Decode(&status); err != nil {
+		return nil, err
+	}
+
+	return &status, nil
 }
