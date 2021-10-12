@@ -2,6 +2,7 @@ package connect
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
 	"path"
@@ -123,4 +124,34 @@ func GetConnectorStatus(endpoint, name string) (*ConnectorStatus, error) {
 	}
 
 	return &status, nil
+}
+
+func DeleteConnector(endpoint, name string) error {
+	u, err := url.Parse(endpoint)
+	if err != nil {
+		return err
+	}
+	u.Path = path.Join(u.Path, "connectors", name)
+
+	req, err := http.NewRequest(http.MethodDelete, u.String(), nil)
+	if err != nil {
+		return err
+	}
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		var errorMsg Error
+		if err := json.NewDecoder(resp.Body).Decode(&errorMsg); err != nil {
+			return err
+		}
+		// TODO return error
+		fmt.Printf("%d: %s\n", errorMsg.Code, errorMsg.Message)
+	}
+
+	return nil
 }
