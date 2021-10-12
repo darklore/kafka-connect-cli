@@ -1,21 +1,10 @@
-/*
-Copyright © 2021 darklore
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
 package cmd
 
 import (
+	"encoding/json"
+	"os"
+
+	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
 	"github.com/spf13/cobra"
 )
 
@@ -25,6 +14,28 @@ var taskCmd = &cobra.Command{
 	Short: "Commands for connector tasks",
 }
 
+var taskListCmd = &cobra.Command{
+	Use:   "list",
+	Short: "List tasks in a connector",
+	RunE:  taskListCmdDo,
+}
+
 func init() {
 	connectorCmd.AddCommand(taskCmd)
+
+	taskCmd.AddCommand(taskListCmd)
+	setConnectorNameFlag(taskListCmd)
+}
+
+func taskListCmdDo(_ *cobra.Command, args []string) error {
+	tasks, err := connect.ListTasks(endpoint, connectorName)
+	if err != nil {
+		return err
+	}
+
+	if err := json.NewEncoder(os.Stdout).Encode(tasks); err != nil {
+		return err
+	}
+
+	return nil
 }
