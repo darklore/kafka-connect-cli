@@ -27,17 +27,17 @@ type Task struct {
 type ConnectorStatus struct {
 	Name  string         `json:"name"`
 	State ConnectorState `json:"connector"`
+	Tasks []TaskState    `json:"tasks"`
+	Type  string         `json:"type"`
 }
 
 type ConnectorState struct {
-	State    string      `json:"state"`
-	WorkerID string      `json:"worker_id"`
-	Tasks    []TaskState `json:"tasks"`
-	Type     string      `json:"type"`
+	State    string `json:"state"`
+	WorkerID string `json:"worker_id"`
 }
 
 type TaskState struct {
-	ID       string `json:"id"`
+	ID       int    `json:"id"`
 	State    string `json:"state"`
 	WorkerID string `json:"worker_id"`
 }

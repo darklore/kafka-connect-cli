@@ -16,7 +16,8 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
+	"encoding/json"
+	"os"
 
 	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
 	"github.com/spf13/cobra"
@@ -54,7 +55,10 @@ func clusterCmdRun(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(cluster)
+
+	if err := json.NewEncoder(os.Stdout).Encode(cluster); err != nil {
+		return err
+	}
 
 	return nil
 }
