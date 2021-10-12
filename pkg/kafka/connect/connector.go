@@ -3,6 +3,7 @@ package connect
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"path"
@@ -52,6 +53,38 @@ type TaskConfig map[string]string
 type TaskTopics map[string]Topics
 type Topics struct {
 	Topics []string `json:"topics"`
+}
+
+func CreateConnector(endpoint string, configJSON io.Reader) (*Connector, error) {
+	u, err := url.Parse(endpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	u.Path = path.Join(u.Path, "connectors")
+	resp, err := http.Post(u.String(), "application/json", configJSON)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var r io.Reader = resp.Body
+	//r = io.TeeReader(resp.Body, os.Stderr)
+
+	if resp.StatusCode != http.StatusCreated {
+		var errorMsg Error
+		if err := json.NewDecoder(r).Decode(&errorMsg); err != nil {
+			return nil, err
+		}
+		return nil, fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
+	}
+
+	var connector Connector
+	if err := json.NewDecoder(r).Decode(&connector); err != nil {
+		return nil, err
+	}
+
+	return &connector, nil
 }
 
 func GetConnectorNames(endpoint string) ([]ConnectorName, error) {
@@ -156,13 +189,12 @@ func DeleteConnector(endpoint, name string) error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusNoContent {
 		var errorMsg Error
 		if err := json.NewDecoder(resp.Body).Decode(&errorMsg); err != nil {
 			return err
 		}
-		// TODO return error
-		fmt.Printf("%d: %s\n", errorMsg.Code, errorMsg.Message)
+		return fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
 	}
 
 	return nil

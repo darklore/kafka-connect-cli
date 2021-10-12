@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
 	"github.com/spf13/cobra"
 )
@@ -32,5 +34,7 @@ func deleteCmdDo(cmd *cobra.Command, args []string) error {
 	if err := connect.DeleteConnector(endpoint, connector); err != nil {
 		return err
 	}
+
+	fmt.Println("Deleted.")
 	return nil
 }
