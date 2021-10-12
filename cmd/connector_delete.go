@@ -18,9 +18,18 @@ func init() {
 	setConnectorNameFlag(deleteCmd)
 }
 
-func deleteCmdDo(_ *cobra.Command, args []string) error {
-	err := connect.DeleteConnector(endpoint, connectorName)
+func deleteCmdDo(cmd *cobra.Command, args []string) error {
+	endpoint, err := getEndpoint(cmd)
 	if err != nil {
+		return err
+	}
+
+	connector, err := getConnectorName(cmd)
+	if err != nil {
+		return err
+	}
+
+	if err := connect.DeleteConnector(endpoint, connector); err != nil {
 		return err
 	}
 	return nil

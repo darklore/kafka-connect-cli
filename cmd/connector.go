@@ -25,6 +25,11 @@ func init() {
 }
 
 func connectorListCmdDo(cmd *cobra.Command, args []string) error {
+	endpoint, err := getEndpoint(cmd)
+	if err != nil {
+		return err
+	}
+
 	connectors, err := connect.GetConnectorNames(endpoint)
 	if err != nil {
 		return err

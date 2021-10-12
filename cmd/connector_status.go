@@ -21,8 +21,18 @@ func init() {
 	setConnectorNameFlag(statusCmd)
 }
 
-func statusCmdDo(_ *cobra.Command, args []string) error {
-	status, err := connect.GetConnectorStatus(endpoint, connectorName)
+func statusCmdDo(cmd *cobra.Command, args []string) error {
+	endpoint, err := getEndpoint(cmd)
+	if err != nil {
+		return err
+	}
+
+	connector, err := getConnectorName(cmd)
+	if err != nil {
+		return err
+	}
+
+	status, err := connect.GetConnectorStatus(endpoint, connector)
 	if err != nil {
 		return err
 	}

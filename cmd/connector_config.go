@@ -20,8 +20,18 @@ func init() {
 	setConnectorNameFlag(configCmd)
 }
 
-func configCmdDo(_ *cobra.Command, args []string) error {
-	config, err := connect.GetConnectorConfig(endpoint, connectorName)
+func configCmdDo(cmd *cobra.Command, args []string) error {
+	endpoint, err := getEndpoint(cmd)
+	if err != nil {
+		return err
+	}
+
+	connector, err := getConnectorName(cmd)
+	if err != nil {
+		return err
+	}
+
+	config, err := connect.GetConnectorConfig(endpoint, connector)
 	if err != nil {
 		return err
 	}

@@ -31,10 +31,22 @@ func setTaskIDFlag(cmd *cobra.Command) error {
 		return err
 	}
 	cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		if connectorName == "" {
+
+		connector, err := getConnectorName(cmd)
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveError
+		}
+
+		if connector == "" {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		}
-		tasks, err := connect.ListTasks(endpoint, connectorName)
+
+		endpoint, err := getEndpoint(cmd)
+		if err != nil {
+			return nil, cobra.ShellCompDirectiveError
+		}
+
+		tasks, err := connect.ListTasks(endpoint, connector)
 		if err != nil {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		}
@@ -49,8 +61,18 @@ func setTaskIDFlag(cmd *cobra.Command) error {
 	return nil
 }
 
-func taskStatusCmdDo(_ *cobra.Command, args []string) error {
-	tasks, err := connect.GetTaskStatus(endpoint, connectorName, taskID)
+func taskStatusCmdDo(cmd *cobra.Command, args []string) error {
+	endpoint, err := getEndpoint(cmd)
+	if err != nil {
+		return err
+	}
+
+	connector, err := getConnectorName(cmd)
+	if err != nil {
+		return err
+	}
+
+	tasks, err := connect.GetTaskStatus(endpoint, connector, taskID)
 	if err != nil {
 		return err
 	}

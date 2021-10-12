@@ -9,7 +9,6 @@ import (
 )
 
 var cfgFile string
-var endpoint string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -29,7 +28,15 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.kafka-connect-cli.yaml)")
-	rootCmd.PersistentFlags().StringVarP(&endpoint, "endpoint", "e", "http://localhost:8083", "Kafka connect REST endpoint")
+	rootCmd.PersistentFlags().StringP("endpoint", "e", "http://localhost:8083", "Kafka connect REST endpoint")
+}
+
+func getEndpoint(cmd *cobra.Command) (string, error) {
+	endpoint, err := cmd.Root().PersistentFlags().GetString("endpoint")
+	if err != nil {
+		return "", err
+	}
+	return endpoint, nil
 }
 
 // initConfig reads in config file and ENV variables if set.

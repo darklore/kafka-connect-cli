@@ -27,8 +27,18 @@ func init() {
 	setConnectorNameFlag(taskListCmd)
 }
 
-func taskListCmdDo(_ *cobra.Command, args []string) error {
-	tasks, err := connect.ListTasks(endpoint, connectorName)
+func taskListCmdDo(cmd *cobra.Command, args []string) error {
+	endpoint, err := getEndpoint(cmd)
+	if err != nil {
+		return err
+	}
+
+	connector, err := getConnectorName(cmd)
+	if err != nil {
+		return err
+	}
+
+	tasks, err := connect.ListTasks(endpoint, connector)
 	if err != nil {
 		return err
 	}

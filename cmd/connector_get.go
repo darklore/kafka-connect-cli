@@ -15,7 +15,6 @@ var (
 		Short: "Get information of connector",
 		RunE:  getCmdDo,
 	}
-	connectorName string
 )
 
 func init() {
@@ -26,11 +25,16 @@ func init() {
 
 func setConnectorNameFlag(cmd *cobra.Command) error {
 	flagName := "connector"
-	cmd.Flags().StringVarP(&connectorName, flagName, "n", "", "connector name")
+	cmd.Flags().StringP(flagName, "n", "", "connector name")
 	if err := cmd.MarkFlagRequired(flagName); err != nil {
 		return err
 	}
 	cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		endpoint, err := getEndpoint(cmd)
+		if err != nil {
+			return []string{}, cobra.ShellCompDirectiveError
+		}
+
 		connectors, err := connect.GetConnectorNames(endpoint)
 		if err != nil {
 			return []string{}, cobra.ShellCompDirectiveError
@@ -41,7 +45,25 @@ func setConnectorNameFlag(cmd *cobra.Command) error {
 	return nil
 }
 
-func getCmdDo(_ *cobra.Command, args []string) error {
+func getConnectorName(cmd *cobra.Command) (string, error) {
+	connector, err := cmd.Flags().GetString("connector")
+	if err != nil {
+		return "", err
+	}
+	return connector, nil
+}
+
+func getCmdDo(cmd *cobra.Command, args []string) error {
+	endpoint, err := getEndpoint(cmd)
+	if err != nil {
+		return err
+	}
+
+	connectorName, err := getConnectorName(cmd)
+	if err != nil {
+		return err
+	}
+
 	connector, err := connect.GetConnector(endpoint, connectorName)
 	if err != nil {
 		return err

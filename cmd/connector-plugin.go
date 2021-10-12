@@ -26,6 +26,11 @@ func init() {
 }
 
 func listConnectorPluginCmdDo(cmd *cobra.Command, args []string) error {
+	endpoint, err := getEndpoint(cmd)
+	if err != nil {
+		return err
+	}
+
 	plugins, err := connect.ListConnectorPlugin(endpoint)
 	if err != nil {
 		return err

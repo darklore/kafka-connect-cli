@@ -20,6 +20,11 @@ func init() {
 }
 
 func workerCmdRun(cmd *cobra.Command, args []string) error {
+	endpoint, err := getEndpoint(cmd)
+	if err != nil {
+		return err
+	}
+
 	worker, err := connect.GetWorker(endpoint)
 	if err != nil {
 		return err
