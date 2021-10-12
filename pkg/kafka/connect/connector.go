@@ -42,6 +42,13 @@ type TaskState struct {
 	WorkerID string `json:"worker_id"`
 }
 
+type TaskInfo struct {
+	ID     Task       `json:"id"`
+	Config TaskConfig `json:"config"`
+}
+
+type TaskConfig map[string]string
+
 func GetConnectorNames(endpoint string) ([]ConnectorName, error) {
 	u, err := url.Parse(endpoint)
 	if err != nil {
@@ -154,4 +161,55 @@ func DeleteConnector(endpoint, name string) error {
 	}
 
 	return nil
+}
+
+func ListTasks(endpoint, name string) ([]TaskInfo, error) {
+	u, err := url.Parse(endpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	u.Path = path.Join(u.Path, "connectors", name, "tasks")
+	resp, err := http.Get(u.String())
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var tasks []TaskInfo
+	if err := json.NewDecoder(resp.Body).Decode(&tasks); err != nil {
+		return nil, err
+	}
+
+	return tasks, nil
+}
+
+func GetTaskStatus(endpoint, name string, id int) (*TaskState, error) {
+	u, err := url.Parse(endpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	u.Path = path.Join(u.Path, "connectors", name, "tasks", fmt.Sprintf("%d", id), "status")
+
+	resp, err := http.Get(u.String())
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		var errorMsg Error
+		if err := json.NewDecoder(resp.Body).Decode(&errorMsg); err != nil {
+			return nil, err
+		}
+		return nil, fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
+	}
+
+	var task TaskState
+	if err := json.NewDecoder(resp.Body).Decode(&task); err != nil {
+		return nil, err
+	}
+
+	return &task, nil
 }

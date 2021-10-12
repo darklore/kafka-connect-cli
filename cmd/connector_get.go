@@ -25,11 +25,12 @@ func init() {
 }
 
 func setConnectorNameFlag(cmd *cobra.Command) error {
-	cmd.Flags().StringVarP(&connectorName, "name", "n", "", "connector name")
-	if err := cmd.MarkFlagRequired("name"); err != nil {
+	flagName := "connector"
+	cmd.Flags().StringVarP(&connectorName, flagName, "n", "", "connector name")
+	if err := cmd.MarkFlagRequired(flagName); err != nil {
 		return err
 	}
-	cmd.RegisterFlagCompletionFunc("name", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		connectors, err := connect.GetConnectorNames(endpoint)
 		if err != nil {
 			return []string{}, cobra.ShellCompDirectiveError
