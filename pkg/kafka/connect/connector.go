@@ -2,7 +2,6 @@ package connect
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"net/url"
 	"path"
@@ -52,7 +51,6 @@ func GetConnector(endpoint, name string) (*Connector, error) {
 	}
 
 	u.Path = path.Join(u.Path, "connectors", name)
-	fmt.Println(u)
 	resp, err := http.Get(u.String())
 	if err != nil {
 		return nil, err

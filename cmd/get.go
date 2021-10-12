@@ -16,48 +16,54 @@ limitations under the License.
 package cmd
 
 import (
+	"errors"
 	"fmt"
+	"sort"
 
 	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
 	"github.com/spf13/cobra"
 )
 
-var name string
-
 // getCmd represents the get command
 var getCmd = &cobra.Command{
 	Use:   "get",
-	Short: "A brief description of your command",
+	Short: "Get information of connector",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
 Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
+	Args: func(_ *cobra.Command, args []string) error {
+		if len(args) < 1 {
+			return errors.New("requires at least one arg")
+		}
+		return nil
+	},
 	RunE: getCmdDo,
 }
 
 func init() {
 	connectorCmd.AddCommand(getCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// getCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	getCmd.Flags().StringVarP(&name, "name", "n", "", "Help message for toggle")
-	getCmd.MarkFlagRequired("name")
 }
 
-func getCmdDo(cmd *cobra.Command, args []string) error {
+func getCmdDo(_ *cobra.Command, args []string) error {
+	name := args[0]
 	connector, err := connect.GetConnector(endpoint, name)
 	if err != nil {
 		return err
 	}
-	fmt.Println(connector)
+
+	// sort config map by config name
+	keys := make([]string, 0, len(connector.Config))
+	for key := range connector.Config {
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+
+	for _, k := range keys {
+		fmt.Printf("%s: %s\n", k, connector.Config[k])
+	}
 
 	return nil
 }
