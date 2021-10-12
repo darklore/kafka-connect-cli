@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
 	"github.com/spf13/cobra"
@@ -16,8 +17,6 @@ var taskStatusCmd = &cobra.Command{
 	RunE:  taskStatusCmdDo,
 }
 
-var taskID int
-
 func init() {
 	taskCmd.AddCommand(taskStatusCmd)
 	setConnectorNameFlag(taskStatusCmd)
@@ -26,19 +25,15 @@ func init() {
 
 func setTaskIDFlag(cmd *cobra.Command) error {
 	flagName := "task"
-	cmd.Flags().IntVarP(&taskID, flagName, "t", 0, "task ID")
+	cmd.Flags().IntP(flagName, "t", 0, "task ID")
 	if err := cmd.MarkFlagRequired(flagName); err != nil {
 		return err
 	}
 	cmd.RegisterFlagCompletionFunc(flagName, func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 
 		connector, err := getConnectorName(cmd)
-		if err != nil {
+		if err != nil || connector == "" {
 			return nil, cobra.ShellCompDirectiveError
-		}
-
-		if connector == "" {
-			return nil, cobra.ShellCompDirectiveNoFileComp
 		}
 
 		endpoint, err := getEndpoint(cmd)
@@ -61,6 +56,14 @@ func setTaskIDFlag(cmd *cobra.Command) error {
 	return nil
 }
 
+func getTaskID(cmd *cobra.Command) (string, error) {
+	id, err := cmd.Flags().GetString("task")
+	if err != nil {
+		return "", err
+	}
+	return id, nil
+}
+
 func taskStatusCmdDo(cmd *cobra.Command, args []string) error {
 	endpoint, err := getEndpoint(cmd)
 	if err != nil {
@@ -72,7 +75,13 @@ func taskStatusCmdDo(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	tasks, err := connect.GetTaskStatus(endpoint, connector, taskID)
+	taskID, err := getTaskID(cmd)
+	if err != nil {
+		return err
+	}
+
+	id, _ := strconv.Atoi(taskID)
+	tasks, err := connect.GetTaskStatus(endpoint, connector, id)
 	if err != nil {
 		return err
 	}
