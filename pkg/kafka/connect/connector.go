@@ -49,6 +49,11 @@ type TaskInfo struct {
 
 type TaskConfig map[string]string
 
+type TaskTopics map[string]Topics
+type Topics struct {
+	Topics []string `json:"topics"`
+}
+
 func GetConnectorNames(endpoint string) ([]ConnectorName, error) {
 	u, err := url.Parse(endpoint)
 	if err != nil {
@@ -212,4 +217,25 @@ func GetTaskStatus(endpoint, name string, id int) (*TaskState, error) {
 	}
 
 	return &task, nil
+}
+
+func ListTopics(endpoint, name string) ([]string, error) {
+	u, err := url.Parse(endpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	u.Path = path.Join(u.Path, "connectors", name, "topics")
+	resp, err := http.Get(u.String())
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var taskTopics TaskTopics
+	if err := json.NewDecoder(resp.Body).Decode(&taskTopics); err != nil {
+		return nil, err
+	}
+
+	return taskTopics[name].Topics, nil
 }
