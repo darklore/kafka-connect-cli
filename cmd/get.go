@@ -41,6 +41,14 @@ to quickly create a Cobra application.`,
 		return nil
 	},
 	RunE: getCmdDo,
+	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		connectors, err := connect.GetConnectorNames(endpoint)
+		if err != nil {
+			return []string{}, cobra.ShellCompDirectiveNoFileComp
+		}
+
+		return connectors, cobra.ShellCompDirectiveNoFileComp
+	},
 }
 
 func init() {

@@ -7,7 +7,7 @@ import (
 	"path"
 )
 
-type ConnectorName string
+type ConnectorName = string
 
 type Connector struct {
 	Name   ConnectorName   `json:"name"`
