@@ -16,11 +16,7 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
-	"net/http"
-	"net/url"
-	"path"
 
 	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
 	"github.com/spf13/cobra"
@@ -57,21 +53,8 @@ func init() {
 }
 
 func getCmdDo(cmd *cobra.Command, args []string) error {
-	u, err := url.Parse(endpoint)
+	connector, err := connect.GetConnector(endpoint, name)
 	if err != nil {
-		return err
-	}
-
-	u.Path = path.Join(u.Path, "connectors", name)
-	fmt.Println(u)
-	resp, err := http.Get(u.String())
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
-
-	var connector connect.Connector
-	if json.NewDecoder(resp.Body).Decode(&connector); err != nil {
 		return err
 	}
 	fmt.Println(connector)

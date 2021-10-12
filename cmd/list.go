@@ -16,11 +16,7 @@ limitations under the License.
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
-	"net/http"
-	"net/url"
-	"path"
 
 	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
 	"github.com/spf13/cobra"
@@ -37,20 +33,8 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		u, err := url.Parse(endpoint)
+		connectors, err := connect.GetConnectorNames(endpoint)
 		if err != nil {
-			return err
-		}
-
-		u.Path = path.Join(u.Path, "connectors")
-		resp, err := http.Get(u.String())
-		if err != nil {
-			return err
-		}
-		defer resp.Body.Close()
-
-		var connectors []connect.ConnectorName
-		if json.NewDecoder(resp.Body).Decode(&connectors); err != nil {
 			return err
 		}
 		fmt.Println(connectors)
