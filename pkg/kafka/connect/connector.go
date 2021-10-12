@@ -9,9 +9,7 @@ type Connector struct {
 	Tasks  []Task          `json:"tasks"`
 }
 
-type ConnectorConfig struct {
-	ConnectorClass string `json:"connector.class"`
-}
+type ConnectorConfig map[string]string
 
 type Task struct {
 	Connector string `json:"connector"`
