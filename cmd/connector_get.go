@@ -16,9 +16,9 @@ limitations under the License.
 package cmd
 
 import (
+	"encoding/json"
 	"errors"
-	"fmt"
-	"sort"
+	"os"
 
 	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
 	"github.com/spf13/cobra"
@@ -62,15 +62,8 @@ func getCmdDo(_ *cobra.Command, args []string) error {
 		return err
 	}
 
-	// sort config map by config name
-	keys := make([]string, 0, len(connector.Config))
-	for key := range connector.Config {
-		keys = append(keys, key)
-	}
-	sort.Strings(keys)
-
-	for _, k := range keys {
-		fmt.Printf("%s: %s\n", k, connector.Config[k])
+	if err := json.NewEncoder(os.Stdout).Encode(connector); err != nil {
+		return err
 	}
 
 	return nil
