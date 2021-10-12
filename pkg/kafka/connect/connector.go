@@ -20,7 +20,7 @@ type ConnectorConfig map[string]string
 
 type Task struct {
 	Connector string `json:"connector"`
-	Task      int    `json:"task"`
+	ID        int    `json:"task"`
 }
 
 func GetConnectorNames(endpoint string) ([]ConnectorName, error) {
@@ -63,4 +63,25 @@ func GetConnector(endpoint, name string) (*Connector, error) {
 	}
 
 	return &connector, nil
+}
+
+func GetConnectorConfig(endpoint, name string) (*ConnectorConfig, error) {
+	u, err := url.Parse(endpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	u.Path = path.Join(u.Path, "connectors", name, "config")
+	resp, err := http.Get(u.String())
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	var config ConnectorConfig
+	if err := json.NewDecoder(resp.Body).Decode(&config); err != nil {
+		return nil, err
+	}
+
+	return &config, nil
 }
