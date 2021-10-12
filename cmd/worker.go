@@ -16,34 +16,33 @@ limitations under the License.
 package cmd
 
 import (
+	"encoding/json"
+	"os"
+
 	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
 	"github.com/spf13/cobra"
 )
 
-// deleteCmd represents the delete command
-var deleteCmd = &cobra.Command{
-	Use:   "delete",
-	Short: "Delete a connector",
-	RunE:  deleteCmdDo,
-	ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-		connectors, err := connect.GetConnectorNames(endpoint)
-		if err != nil {
-			return []string{}, cobra.ShellCompDirectiveNoFileComp
-		}
-
-		return connectors, cobra.ShellCompDirectiveNoFileComp
-	},
+// workerCmd represents the worker command
+var workerCmd = &cobra.Command{
+	Use:   "worker",
+	Short: "Get a connect worker information",
+	RunE:  workerCmdRun,
 }
 
 func init() {
-	connectorCmd.AddCommand(deleteCmd)
+	rootCmd.AddCommand(workerCmd)
 }
 
-func deleteCmdDo(_ *cobra.Command, args []string) error {
-	name := args[0]
-	err := connect.DeleteConnector(endpoint, name)
+func workerCmdRun(cmd *cobra.Command, args []string) error {
+	worker, err := connect.GetWorker(endpoint)
 	if err != nil {
 		return err
 	}
+
+	if err := json.NewEncoder(os.Stdout).Encode(worker); err != nil {
+		return err
+	}
+
 	return nil
 }

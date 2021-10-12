@@ -5,13 +5,13 @@ import (
 	"net/http"
 )
 
-type Cluster struct {
+type Worker struct {
 	Version string `json:"version"`
 	Commit  string `json:"commit"`
-	ID      string `json:"kafka_cluster_id"`
+	ID      string `json:"kafka_worker_id"`
 }
 
-func GetCluster(endpoint string) (*Cluster, error) {
+func GetWorker(endpoint string) (*Worker, error) {
 	req, err := http.NewRequest(http.MethodGet, endpoint, nil)
 	if err != nil {
 		return nil, err
@@ -23,10 +23,10 @@ func GetCluster(endpoint string) (*Cluster, error) {
 	}
 	defer resp.Body.Close()
 
-	var cluster Cluster
-	if err := json.NewDecoder(resp.Body).Decode(&cluster); err != nil {
+	var worker Worker
+	if err := json.NewDecoder(resp.Body).Decode(&worker); err != nil {
 		return nil, err
 	}
 
-	return &cluster, nil
+	return &worker, nil
 }
