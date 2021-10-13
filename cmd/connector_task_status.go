@@ -80,7 +80,11 @@ func taskStatusCmdDo(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	id, _ := strconv.Atoi(taskID)
+	id, err := strconv.Atoi(taskID)
+	if err != nil {
+		return err
+	}
+
 	tasks, err := connect.GetTaskStatus(endpoint, connector, id)
 	if err != nil {
 		return err

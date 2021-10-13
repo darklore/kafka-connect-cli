@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"fmt"
-	"sort"
+	"encoding/json"
+	"os"
 
 	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
 	"github.com/spf13/cobra"
@@ -36,15 +36,8 @@ func configCmdDo(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	// sort config map by config name
-	keys := make([]string, 0, len(*config))
-	for key := range *config {
-		keys = append(keys, key)
-	}
-	sort.Strings(keys)
-
-	for _, k := range keys {
-		fmt.Printf("%s: %s\n", k, (*config)[k])
+	if err := json.NewEncoder(os.Stdout).Encode(config); err != nil {
+		return err
 	}
 
 	return nil

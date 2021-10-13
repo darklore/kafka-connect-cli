@@ -1,7 +1,8 @@
 package cmd
 
 import (
-	"fmt"
+	"encoding/json"
+	"os"
 
 	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
 	"github.com/spf13/cobra"
@@ -35,8 +36,8 @@ func connectorListCmdDo(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	for _, c := range connectors {
-		fmt.Println(c)
+	if err := json.NewEncoder(os.Stdout).Encode(connectors); err != nil {
+		return err
 	}
 
 	return nil
