@@ -322,13 +322,13 @@ func ListTasks(endpoint, name string) ([]TaskInfo, error) {
 	return tasks, nil
 }
 
-func GetTaskStatus(endpoint, name string, id int) (*TaskState, error) {
+func GetTaskStatus(endpoint, name, id string) (*TaskState, error) {
 	u, err := url.Parse(endpoint)
 	if err != nil {
 		return nil, err
 	}
 
-	u.Path = path.Join(u.Path, "connectors", name, "tasks", fmt.Sprintf("%d", id), "status")
+	u.Path = path.Join(u.Path, "connectors", name, "tasks", id, "status")
 
 	resp, err := http.Get(u.String())
 	if err != nil {
@@ -350,6 +350,37 @@ func GetTaskStatus(endpoint, name string, id int) (*TaskState, error) {
 	}
 
 	return &task, nil
+}
+
+func RestartTask(endpoint, name, id string) error {
+	u, err := url.Parse(endpoint)
+	if err != nil {
+		return err
+	}
+
+	u.Path = path.Join(u.Path, "connectors", name, "tasks", id, "restart")
+	req, err := http.NewRequest(http.MethodPost, u.String(), nil)
+	if err != nil {
+		return err
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	var r io.Reader = resp.Body
+	// r = io.TeeReader(resp.Body, os.Stderr)
+
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		var errorMsg Error
+		if err := json.NewDecoder(r).Decode(&errorMsg); err != nil {
+			return err
+		}
+		return fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
+	}
+
+	return nil
 }
 
 func ListTopics(endpoint, name string) ([]string, error) {

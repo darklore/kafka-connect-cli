@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"strconv"
 
 	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
 	"github.com/spf13/cobra"
@@ -25,7 +24,7 @@ func init() {
 
 func setTaskIDFlag(cmd *cobra.Command) error {
 	flagName := "task"
-	cmd.Flags().IntP(flagName, "t", 0, "task ID")
+	cmd.Flags().StringP(flagName, "t", "", "task ID")
 	if err := cmd.MarkFlagRequired(flagName); err != nil {
 		return err
 	}
@@ -80,12 +79,7 @@ func taskStatusCmdDo(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	id, err := strconv.Atoi(taskID)
-	if err != nil {
-		return err
-	}
-
-	tasks, err := connect.GetTaskStatus(endpoint, connector, id)
+	tasks, err := connect.GetTaskStatus(endpoint, connector, taskID)
 	if err != nil {
 		return err
 	}
