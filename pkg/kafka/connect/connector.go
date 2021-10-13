@@ -87,7 +87,7 @@ func CreateConnector(endpoint string, configJSON io.Reader) (*Connector, error) 
 	return &connector, nil
 }
 
-func GetConnectorNames(endpoint string) ([]ConnectorName, error) {
+func ListConnectors(endpoint string) ([]ConnectorName, error) {
 	u, err := url.Parse(endpoint)
 	if err != nil {
 		return nil, err
@@ -99,6 +99,14 @@ func GetConnectorNames(endpoint string) ([]ConnectorName, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		var errorMsg Error
+		if err := json.NewDecoder(resp.Body).Decode(&errorMsg); err != nil {
+			return nil, err
+		}
+		return nil, fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
+	}
 
 	var connectors []ConnectorName
 	if err := json.NewDecoder(resp.Body).Decode(&connectors); err != nil {

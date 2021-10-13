@@ -35,7 +35,7 @@ func setConnectorNameFlag(cmd *cobra.Command) error {
 			return []string{}, cobra.ShellCompDirectiveError
 		}
 
-		connectors, err := connect.GetConnectorNames(endpoint)
+		connectors, err := connect.ListConnectors(endpoint)
 		if err != nil {
 			return []string{}, cobra.ShellCompDirectiveError
 		}

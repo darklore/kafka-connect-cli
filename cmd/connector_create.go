@@ -29,12 +29,12 @@ func connectorCreateCmdDo(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	config, err := cmd.Flags().GetString("connector-config")
+	fileName, err := cmd.Flags().GetString("connector-config")
 	if err != nil {
 		return err
 	}
 
-	configFile, err := os.Open(config)
+	configFile, err := os.Open(fileName)
 	if err != nil {
 		return err
 	}
