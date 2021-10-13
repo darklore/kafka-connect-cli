@@ -186,7 +186,7 @@ func RestartConnector(endpoint, name string) error {
 	}
 
 	u.Path = path.Join(u.Path, "connectors", name, "restart")
-	req, err := http.NewRequest("POST", u.String(), nil)
+	req, err := http.NewRequest(http.MethodPost, u.String(), nil)
 	if err != nil {
 		return err
 	}
@@ -198,6 +198,68 @@ func RestartConnector(endpoint, name string) error {
 
 	var r io.Reader = resp.Body
 	// r = io.TeeReader(resp.Body, os.Stderr)
+
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		var errorMsg Error
+		if err := json.NewDecoder(r).Decode(&errorMsg); err != nil {
+			return err
+		}
+		return fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
+	}
+
+	return nil
+}
+
+func PauseConnector(endpoint, name string) error {
+	u, err := url.Parse(endpoint)
+	if err != nil {
+		return err
+	}
+
+	u.Path = path.Join(u.Path, "connectors", name, "pause")
+	req, err := http.NewRequest(http.MethodPut, u.String(), nil)
+	if err != nil {
+		return err
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	var r io.Reader = resp.Body
+	//r = io.TeeReader(resp.Body, os.Stderr)
+
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		var errorMsg Error
+		if err := json.NewDecoder(r).Decode(&errorMsg); err != nil {
+			return err
+		}
+		return fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
+	}
+
+	return nil
+}
+
+func ResumeConnector(endpoint, name string) error {
+	u, err := url.Parse(endpoint)
+	if err != nil {
+		return err
+	}
+
+	u.Path = path.Join(u.Path, "connectors", name, "resume")
+	req, err := http.NewRequest(http.MethodPut, u.String(), nil)
+	if err != nil {
+		return err
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	var r io.Reader = resp.Body
+	//r = io.TeeReader(resp.Body, os.Stderr)
 
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
 		var errorMsg Error
