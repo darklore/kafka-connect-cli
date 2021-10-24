@@ -23,23 +23,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// versionCmd represents the version command
-var versionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "Show version",
-	Run: func(cmd *cobra.Command, args []string) {
-		showVersion()
-	},
-}
-
-func init() {
-	rootCmd.AddCommand(versionCmd)
-}
-
-func showVersion() {
-	buildInfo, ok := debug.ReadBuildInfo()
-	if !ok {
-		log.Fatal("Failed to get build info.")
+func newVersionCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "version",
+		Short: "Show version",
+		Run: func(cmd *cobra.Command, args []string) {
+			buildInfo, ok := debug.ReadBuildInfo()
+			if !ok {
+				log.Fatal("Failed to get build info.")
+			}
+			fmt.Println(buildInfo.Main.Version)
+		},
 	}
-	fmt.Println(buildInfo.Main.Version)
+	return cmd
 }

@@ -1,4 +1,4 @@
-package cmd
+package plugins
 
 import (
 	"encoding/json"
@@ -8,28 +8,27 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newWorkerCmd() *cobra.Command {
-	var cmd = &cobra.Command{
-		Use:   "worker",
-		Short: "Get a connect worker information",
+func newConnectorPluginListCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "list",
+		Short: "List connector plugins",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			endpoint, err := cmd.Root().PersistentFlags().GetString("endpoint")
 			if err != nil {
 				return err
 			}
 
-			worker, err := connect.GetWorker(endpoint)
+			plugins, err := connect.ListConnectorPlugin(endpoint)
 			if err != nil {
 				return err
 			}
 
-			if err := json.NewEncoder(os.Stdout).Encode(worker); err != nil {
+			if err := json.NewEncoder(os.Stdout).Encode(plugins); err != nil {
 				return err
 			}
 
 			return nil
 		},
 	}
-
 	return cmd
 }

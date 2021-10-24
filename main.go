@@ -1,7 +1,16 @@
 package main
 
-import "github.com/darklore/kafka-connect-cli/cmd"
+import (
+	"fmt"
+	"os"
+
+	"github.com/darklore/kafka-connect-cli/cmd"
+)
 
 func main() {
-	cmd.Execute()
+	c := cmd.NewCmd()
+	if err := c.Execute(); err != nil {
+		fmt.Fprintln(os.Stderr, "Error:", err)
+		os.Exit(1)
+	}
 }

@@ -1,29 +1,34 @@
 package cmd
 
 import (
+	"log"
+	"runtime/debug"
+
+	"github.com/darklore/kafka-connect-cli/cmd/connector"
+	"github.com/darklore/kafka-connect-cli/cmd/plugins"
 	"github.com/spf13/cobra"
 )
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:   "kafka-connect-cli",
-	Short: "Command line tool around kafka connect REST interface",
-}
-
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
-func Execute() {
-	cobra.CheckErr(rootCmd.Execute())
-}
-
-func init() {
-	rootCmd.PersistentFlags().StringP("endpoint", "e", "http://localhost:8083", "Kafka connect REST endpoint")
-}
-
-func getEndpoint(cmd *cobra.Command) (string, error) {
-	endpoint, err := cmd.Root().PersistentFlags().GetString("endpoint")
-	if err != nil {
-		return "", err
+func NewCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "kafka-connect-cli",
+		Short: "Command line tool arounc kakfa connect REST interface",
 	}
-	return endpoint, nil
+
+	cmd.PersistentFlags().StringP("endpoint", "e", "http://localhost:8083", "Kafka connect REST endpoint")
+
+	buildInfo, ok := debug.ReadBuildInfo()
+	if !ok {
+		log.Fatal("Failed to get build info.")
+	}
+	cmd.Version = buildInfo.Main.Version
+
+	// subcommands
+	cmd.AddCommand(newVersionCmd())
+
+	cmd.AddCommand(newWorkerCmd())
+	cmd.AddCommand(connector.NewCmd())
+	cmd.AddCommand(plugins.NewConnectorPluginCmd())
+
+	return cmd
 }

@@ -1,4 +1,4 @@
-package cmd
+package connector
 
 import (
 	"encoding/json"
@@ -8,22 +8,22 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newWorkerCmd() *cobra.Command {
-	var cmd = &cobra.Command{
-		Use:   "worker",
-		Short: "Get a connect worker information",
-		RunE: func(cmd *cobra.Command, args []string) error {
+func newListCmd() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "list",
+		Short: "List connectors' name",
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			endpoint, err := cmd.Root().PersistentFlags().GetString("endpoint")
 			if err != nil {
 				return err
 			}
 
-			worker, err := connect.GetWorker(endpoint)
+			connectors, err := connect.ListConnectors(endpoint)
 			if err != nil {
 				return err
 			}
 
-			if err := json.NewEncoder(os.Stdout).Encode(worker); err != nil {
+			if err := json.NewEncoder(os.Stdout).Encode(connectors); err != nil {
 				return err
 			}
 
