@@ -23,6 +23,7 @@ func NewCmd() *cobra.Command {
 	cmd.AddCommand(newResumeCmd())
 	cmd.AddCommand(newStatusCmd())
 	cmd.AddCommand(newTopicsCmd())
+	cmd.AddCommand(newUpdateCmd())
 
 	cmd.AddCommand(tasks.NewTasksCmd())
 	return cmd

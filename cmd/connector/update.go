@@ -8,12 +8,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newCreateCmd() *cobra.Command {
+func newUpdateCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "create",
-		Short: "Create a new connector",
+		Use:   "update",
+		Short: "Update or create a connector",
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			endpoint, err := cmd.Root().PersistentFlags().GetString("endpoint")
+			if err != nil {
+				return err
+			}
+
+			connectorName, err := cmd.Flags().GetString("connector")
 			if err != nil {
 				return err
 			}
@@ -29,7 +34,7 @@ func newCreateCmd() *cobra.Command {
 			}
 			defer configFile.Close()
 
-			connector, err := connect.CreateConnector(endpoint, configFile)
+			connector, err := connect.UpdateConnector(endpoint, connectorName, configFile)
 			if err != nil {
 				return err
 			}
@@ -41,6 +46,8 @@ func newCreateCmd() *cobra.Command {
 			return nil
 		},
 	}
+
+	setConnectorFlag(cmd)
 
 	cmd.Flags().String("connector-config", "", "File path to connector config file")
 	cmd.MarkFlagRequired("connector-config")

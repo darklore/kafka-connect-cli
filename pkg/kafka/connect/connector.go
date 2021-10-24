@@ -87,6 +87,41 @@ func CreateConnector(endpoint string, configJSON io.Reader) (*Connector, error) 
 	return &connector, nil
 }
 
+func UpdateConnector(endpoint, name string, configJSON io.Reader) (*Connector, error) {
+	u, err := url.Parse(endpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	u.Path = path.Join(u.Path, "connectors", name, "config")
+	req, err := http.NewRequest(http.MethodPut, u.String(), configJSON)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("Content-Type", "application/json")
+
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		var errorMsg Error
+		if err := json.NewDecoder(resp.Body).Decode(&errorMsg); err != nil {
+			return nil, err
+		}
+		return nil, fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
+	}
+
+	var connector Connector
+	if err := json.NewDecoder(resp.Body).Decode(&connector); err != nil {
+		return nil, err
+	}
+
+	return &connector, nil
+}
+
 func ListConnectors(endpoint string) ([]ConnectorName, error) {
 	u, err := url.Parse(endpoint)
 	if err != nil {
