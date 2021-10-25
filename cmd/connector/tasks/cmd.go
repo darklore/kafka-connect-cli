@@ -15,6 +15,7 @@ func NewTasksCmd() *cobra.Command {
 
 	cmd.AddCommand(newListCmd())
 	cmd.AddCommand(newRestartCmd())
+	cmd.AddCommand(newStatusCmd())
 	return cmd
 }
 
