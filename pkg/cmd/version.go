@@ -17,8 +17,6 @@ package cmd
 
 import (
 	"fmt"
-	"log"
-	"runtime/debug"
 
 	"github.com/spf13/cobra"
 )
@@ -28,11 +26,7 @@ func newVersionCmd() *cobra.Command {
 		Use:   "version",
 		Short: "Show version",
 		Run: func(cmd *cobra.Command, args []string) {
-			buildInfo, ok := debug.ReadBuildInfo()
-			if !ok {
-				log.Fatal("Failed to get build info.")
-			}
-			fmt.Println(buildInfo.Main.Version)
+			fmt.Println(cmd.Root().Version)
 		},
 	}
 	return cmd
