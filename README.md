@@ -6,7 +6,7 @@ Command line tool around kafka connect REST interface
 Command line tool arounc kakfa connect REST interface
 
 Usage:
-  kafka-connect-cli [command]
+  kccli [command]
 
 Available Commands:
   completion  generate the autocompletion script for the specified shell
@@ -18,7 +18,13 @@ Available Commands:
 
 Flags:
   -e, --endpoint string   Kafka connect REST endpoint (default "http://localhost:8083")
-  -h, --help              help for kafka-connect-cli
+  -h, --help              help for kccli
 
-Use "kafka-connect-cli [command] --help" for more information about a command.
+Use "kccli [command] --help" for more information about a command.
+```
+
+## Install
+
+```
+$ go install github.com/darklore/kafka-connect-cli/cmd/kccli@latest
 ```
