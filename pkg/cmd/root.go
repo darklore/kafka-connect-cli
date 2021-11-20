@@ -4,14 +4,14 @@ import (
 	"log"
 	"runtime/debug"
 
-	"github.com/darklore/kafka-connect-cli/cmd/connector"
-	"github.com/darklore/kafka-connect-cli/cmd/plugins"
+	"github.com/darklore/kafka-connect-cli/pkg/cmd/connector"
+	"github.com/darklore/kafka-connect-cli/pkg/cmd/plugins"
 	"github.com/spf13/cobra"
 )
 
 func NewCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "kafka-connect-cli",
+		Use:   "kccli",
 		Short: "Command line tool arounc kakfa connect REST interface",
 	}
 

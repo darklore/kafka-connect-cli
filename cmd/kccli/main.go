@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/darklore/kafka-connect-cli/cmd"
+	"github.com/darklore/kafka-connect-cli/pkg/cmd"
 )
 
 func main() {

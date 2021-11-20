@@ -1,7 +1,7 @@
 package connector
 
 import (
-	"github.com/darklore/kafka-connect-cli/cmd/connector/tasks"
+	"github.com/darklore/kafka-connect-cli/pkg/cmd/connector/tasks"
 	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
 	"github.com/spf13/cobra"
 )
