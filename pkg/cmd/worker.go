@@ -12,7 +12,7 @@ func newWorkerCmd() *cobra.Command {
 	var cmd = &cobra.Command{
 		Use:   "worker",
 		Short: "Get a connect worker information",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			endpoint, err := cmd.Root().PersistentFlags().GetString("endpoint")
 			if err != nil {
 				return err
