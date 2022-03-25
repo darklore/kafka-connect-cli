@@ -9,10 +9,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newGetCmd() *cobra.Command {
+func newDescribeCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "get [connector]",
-		Short: "Get information of connector",
+		Use:   "describe [connector]",
+		Short: "Describe information of connector",
 		Args:  cobra.ExactValidArgs(1),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
 			if len(args) == 0 {
