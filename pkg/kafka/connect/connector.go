@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+
+	"github.com/pkg/errors"
 )
 
 type ConnectorName = string
@@ -58,13 +60,13 @@ type Topics struct {
 func CreateConnector(endpoint string, configJSON io.Reader) (*Connector, error) {
 	u, err := url.Parse(endpoint)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Failed to parse url")
 	}
 
 	u.Path = path.Join(u.Path, "connectors")
 	resp, err := http.Post(u.String(), "application/json", configJSON)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Failed to do http request")
 	}
 	defer resp.Body.Close()
 
@@ -74,14 +76,14 @@ func CreateConnector(endpoint string, configJSON io.Reader) (*Connector, error) 
 	if resp.StatusCode != http.StatusCreated {
 		var errorMsg Error
 		if err := json.NewDecoder(r).Decode(&errorMsg); err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "Failed to decode json")
 		}
 		return nil, fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
 	}
 
 	var connector Connector
 	if err := json.NewDecoder(r).Decode(&connector); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Faild to decode json")
 	}
 
 	return &connector, nil
@@ -90,33 +92,33 @@ func CreateConnector(endpoint string, configJSON io.Reader) (*Connector, error) 
 func UpdateConnector(endpoint, name string, configJSON io.Reader) (*Connector, error) {
 	u, err := url.Parse(endpoint)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Failed to parse url")
 	}
 
 	u.Path = path.Join(u.Path, "connectors", name, "config")
 	req, err := http.NewRequest(http.MethodPut, u.String(), configJSON)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Failed to create http request")
 	}
 	req.Header.Add("Content-Type", "application/json")
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Failed to do http request")
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		var errorMsg Error
 		if err := json.NewDecoder(resp.Body).Decode(&errorMsg); err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "Failed to decode json")
 		}
 		return nil, fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
 	}
 
 	var connector Connector
 	if err := json.NewDecoder(resp.Body).Decode(&connector); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Faild to decode json")
 	}
 
 	return &connector, nil
@@ -125,32 +127,32 @@ func UpdateConnector(endpoint, name string, configJSON io.Reader) (*Connector, e
 func ListConnectorNames(endpoint string) ([]ConnectorName, error) {
 	u, err := url.Parse(endpoint)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Failed to parse url")
 	}
 
 	u.Path = path.Join(u.Path, "connectors")
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Failed to create http request")
 	}
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Failed to do http request")
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		var errorMsg Error
 		if err := json.NewDecoder(resp.Body).Decode(&errorMsg); err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "Failed to decode json")
 		}
 		return nil, fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
 	}
 
 	var connectors []ConnectorName
 	if err := json.NewDecoder(resp.Body).Decode(&connectors); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Faild to decode json")
 	}
 
 	return connectors, nil
@@ -159,19 +161,19 @@ func ListConnectorNames(endpoint string) ([]ConnectorName, error) {
 func GetConnector(endpoint, name string) (*Connector, error) {
 	u, err := url.Parse(endpoint)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Failed to parse url")
 	}
 
 	u.Path = path.Join(u.Path, "connectors", name)
 	resp, err := http.Get(u.String())
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Failed to do http request")
 	}
 	defer resp.Body.Close()
 
 	var connector Connector
 	if err := json.NewDecoder(resp.Body).Decode(&connector); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Failed to decode json")
 	}
 
 	return &connector, nil
@@ -180,19 +182,19 @@ func GetConnector(endpoint, name string) (*Connector, error) {
 func GetConnectorConfig(endpoint, name string) (*ConnectorConfig, error) {
 	u, err := url.Parse(endpoint)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Failed to parse url")
 	}
 
 	u.Path = path.Join(u.Path, "connectors", name, "config")
 	resp, err := http.Get(u.String())
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Failed to do http request")
 	}
 	defer resp.Body.Close()
 
 	var config ConnectorConfig
 	if err := json.NewDecoder(resp.Body).Decode(&config); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Faild to decode json")
 	}
 
 	return &config, nil
@@ -201,19 +203,19 @@ func GetConnectorConfig(endpoint, name string) (*ConnectorConfig, error) {
 func GetConnectorStatus(endpoint, name string) (*ConnectorStatus, error) {
 	u, err := url.Parse(endpoint)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Failed to parse url")
 	}
 
 	u.Path = path.Join(u.Path, "connectors", name, "status")
 	resp, err := http.Get(u.String())
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Failed to do http request")
 	}
 	defer resp.Body.Close()
 
 	var status ConnectorStatus
 	if err := json.NewDecoder(resp.Body).Decode(&status); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Failed to decode json")
 	}
 
 	return &status, nil
@@ -222,17 +224,17 @@ func GetConnectorStatus(endpoint, name string) (*ConnectorStatus, error) {
 func RestartConnector(endpoint, name string) error {
 	u, err := url.Parse(endpoint)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Failed to parse url")
 	}
 
 	u.Path = path.Join(u.Path, "connectors", name, "restart")
 	req, err := http.NewRequest(http.MethodPost, u.String(), nil)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Failed to create http request")
 	}
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Failed to do http request")
 	}
 	defer resp.Body.Close()
 
@@ -242,7 +244,7 @@ func RestartConnector(endpoint, name string) error {
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
 		var errorMsg Error
 		if err := json.NewDecoder(r).Decode(&errorMsg); err != nil {
-			return err
+			return errors.Wrap(err, "Failed to decode json")
 		}
 		return fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
 	}
@@ -253,17 +255,17 @@ func RestartConnector(endpoint, name string) error {
 func PauseConnector(endpoint, name string) error {
 	u, err := url.Parse(endpoint)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Failed to parse url")
 	}
 
 	u.Path = path.Join(u.Path, "connectors", name, "pause")
 	req, err := http.NewRequest(http.MethodPut, u.String(), nil)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Failed to create http request")
 	}
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Failed to do http request")
 	}
 	defer resp.Body.Close()
 
@@ -273,7 +275,7 @@ func PauseConnector(endpoint, name string) error {
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
 		var errorMsg Error
 		if err := json.NewDecoder(r).Decode(&errorMsg); err != nil {
-			return err
+			return errors.Wrap(err, "Failed to decode json")
 		}
 		return fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
 	}
@@ -284,17 +286,17 @@ func PauseConnector(endpoint, name string) error {
 func ResumeConnector(endpoint, name string) error {
 	u, err := url.Parse(endpoint)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Failed to parse url")
 	}
 
 	u.Path = path.Join(u.Path, "connectors", name, "resume")
 	req, err := http.NewRequest(http.MethodPut, u.String(), nil)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Failed to create http request")
 	}
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Failed to do http request")
 	}
 	defer resp.Body.Close()
 
@@ -304,7 +306,7 @@ func ResumeConnector(endpoint, name string) error {
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
 		var errorMsg Error
 		if err := json.NewDecoder(r).Decode(&errorMsg); err != nil {
-			return err
+			return errors.Wrap(err, "Failed to decode json")
 		}
 		return fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
 	}
@@ -315,25 +317,25 @@ func ResumeConnector(endpoint, name string) error {
 func DeleteConnector(endpoint, name string) error {
 	u, err := url.Parse(endpoint)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Failed to parse url")
 	}
 	u.Path = path.Join(u.Path, "connectors", name)
 
 	req, err := http.NewRequest(http.MethodDelete, u.String(), nil)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Failed to create http request")
 	}
 
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Failed to do http request")
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusNoContent {
 		var errorMsg Error
 		if err := json.NewDecoder(resp.Body).Decode(&errorMsg); err != nil {
-			return err
+			return errors.Wrap(err, "Failed to decode json")
 		}
 		return fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
 	}
@@ -344,19 +346,19 @@ func DeleteConnector(endpoint, name string) error {
 func ListTasks(endpoint, name string) ([]TaskInfo, error) {
 	u, err := url.Parse(endpoint)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Failed to parse url")
 	}
 
 	u.Path = path.Join(u.Path, "connectors", name, "tasks")
 	resp, err := http.Get(u.String())
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Failed to do http request")
 	}
 	defer resp.Body.Close()
 
 	var tasks []TaskInfo
 	if err := json.NewDecoder(resp.Body).Decode(&tasks); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Failed to decode json")
 	}
 
 	return tasks, nil
@@ -365,28 +367,28 @@ func ListTasks(endpoint, name string) ([]TaskInfo, error) {
 func GetTaskStatus(endpoint, name, id string) (*TaskState, error) {
 	u, err := url.Parse(endpoint)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Failed to parse url")
 	}
 
 	u.Path = path.Join(u.Path, "connectors", name, "tasks", id, "status")
 
 	resp, err := http.Get(u.String())
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Failed to do http request")
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		var errorMsg Error
 		if err := json.NewDecoder(resp.Body).Decode(&errorMsg); err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "Failed to decode json")
 		}
 		return nil, fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
 	}
 
 	var task TaskState
 	if err := json.NewDecoder(resp.Body).Decode(&task); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Failed to decode json")
 	}
 
 	return &task, nil
@@ -395,17 +397,17 @@ func GetTaskStatus(endpoint, name, id string) (*TaskState, error) {
 func RestartTask(endpoint, name, id string) error {
 	u, err := url.Parse(endpoint)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Failed to parse url")
 	}
 
 	u.Path = path.Join(u.Path, "connectors", name, "tasks", id, "restart")
 	req, err := http.NewRequest(http.MethodPost, u.String(), nil)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Failed to create http request")
 	}
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "Failed to do http request")
 	}
 	defer resp.Body.Close()
 
@@ -415,7 +417,7 @@ func RestartTask(endpoint, name, id string) error {
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
 		var errorMsg Error
 		if err := json.NewDecoder(r).Decode(&errorMsg); err != nil {
-			return err
+			return errors.Wrap(err, "Failed to decode json")
 		}
 		return fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
 	}
@@ -426,19 +428,19 @@ func RestartTask(endpoint, name, id string) error {
 func ListTopics(endpoint, name string) ([]string, error) {
 	u, err := url.Parse(endpoint)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Failed to parse url")
 	}
 
 	u.Path = path.Join(u.Path, "connectors", name, "topics")
 	resp, err := http.Get(u.String())
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Failed to do http request")
 	}
 	defer resp.Body.Close()
 
 	var taskTopics TaskTopics
 	if err := json.NewDecoder(resp.Body).Decode(&taskTopics); err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "Failed to decode json")
 	}
 
 	return taskTopics[name].Topics, nil

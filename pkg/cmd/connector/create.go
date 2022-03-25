@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 
+	"github.com/darklore/kafka-connect-cli/pkg/cmd/util"
 	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
 	"github.com/spf13/cobra"
 )
@@ -20,7 +21,7 @@ func newCreateCmd() *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			endpoint, err := cmd.Root().PersistentFlags().GetString("endpoint")
+			endpoint, err := util.GetEndpoint(cmd)
 			if err != nil {
 				return err
 			}

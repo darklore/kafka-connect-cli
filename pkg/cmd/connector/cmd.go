@@ -2,6 +2,7 @@ package connector
 
 import (
 	"github.com/darklore/kafka-connect-cli/pkg/cmd/connector/tasks"
+	"github.com/darklore/kafka-connect-cli/pkg/cmd/util"
 	"github.com/spf13/cobra"
 )
 
@@ -10,6 +11,8 @@ func NewCmd() *cobra.Command {
 		Use:   "connector",
 		Short: "Commands for connectors",
 	}
+
+	util.AddEndpointFlag(cmd)
 
 	// add subcommands
 	cmd.AddCommand(newListCmd())

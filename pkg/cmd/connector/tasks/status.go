@@ -26,7 +26,7 @@ func newStatusCmd() *cobra.Command {
 			}
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			endpoint, err := cmd.Root().PersistentFlags().GetString("endpoint")
+			endpoint, err := util.GetEndpoint(cmd)
 			if err != nil {
 				return err
 			}

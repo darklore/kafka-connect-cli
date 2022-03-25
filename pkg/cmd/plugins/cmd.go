@@ -1,6 +1,7 @@
 package plugins
 
 import (
+	"github.com/darklore/kafka-connect-cli/pkg/cmd/util"
 	"github.com/spf13/cobra"
 )
 
@@ -10,6 +11,7 @@ func NewConnectorPluginCmd() *cobra.Command {
 		Short: "Commands for connector plugin",
 	}
 
+	util.AddEndpointFlag(cmd)
 	cmd.AddCommand(newConnectorPluginListCmd())
 	return cmd
 }

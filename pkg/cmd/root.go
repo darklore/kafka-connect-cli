@@ -13,8 +13,6 @@ func NewCmd(version string) *cobra.Command {
 	}
 	cmd.Version = version
 
-	cmd.PersistentFlags().StringP("endpoint", "e", "http://localhost:8083", "Kafka connect REST endpoint")
-
 	// subcommands
 	cmd.AddCommand(newVersionCmd())
 
