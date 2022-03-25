@@ -18,7 +18,7 @@ func newListCmd() *cobra.Command {
 				return err
 			}
 
-			connectors, err := connect.ListConnectors(endpoint)
+			connectors, err := connect.ListConnectorNames(endpoint)
 			if err != nil {
 				return err
 			}

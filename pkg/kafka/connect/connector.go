@@ -122,14 +122,19 @@ func UpdateConnector(endpoint, name string, configJSON io.Reader) (*Connector, e
 	return &connector, nil
 }
 
-func ListConnectors(endpoint string) ([]ConnectorName, error) {
+func ListConnectorNames(endpoint string) ([]ConnectorName, error) {
 	u, err := url.Parse(endpoint)
 	if err != nil {
 		return nil, err
 	}
 
 	u.Path = path.Join(u.Path, "connectors")
-	resp, err := http.Get(u.String())
+	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
