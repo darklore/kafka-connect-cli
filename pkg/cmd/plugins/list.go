@@ -12,7 +12,7 @@ func newConnectorPluginListCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list",
 		Short: "List connector plugins",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			endpoint, err := cmd.Root().PersistentFlags().GetString("endpoint")
 			if err != nil {
 				return err

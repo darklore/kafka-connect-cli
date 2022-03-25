@@ -4,29 +4,34 @@ import (
 	"encoding/json"
 	"os"
 
+	"github.com/darklore/kafka-connect-cli/pkg/cmd/util"
 	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
 	"github.com/spf13/cobra"
 )
 
 func newUpdateCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "update",
+		Use:   "update [connector name] [connector config json]",
 		Short: "Update or create a connector",
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		Args:  cobra.ExactValidArgs(2),
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
+			switch len(args) {
+			case 0:
+				return util.ValidConnectorArgs(cmd)
+			case 1:
+				return []string{"json"}, cobra.ShellCompDirectiveFilterFileExt
+			default:
+				return nil, cobra.ShellCompDirectiveNoFileComp
+			}
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
 			endpoint, err := cmd.Root().PersistentFlags().GetString("endpoint")
 			if err != nil {
 				return err
 			}
 
-			connectorName, err := cmd.Flags().GetString("connector")
-			if err != nil {
-				return err
-			}
-
-			fileName, err := cmd.Flags().GetString("connector-config")
-			if err != nil {
-				return err
-			}
+			connectorName := args[0]
+			fileName := args[1]
 
 			configFile, err := os.Open(fileName)
 			if err != nil {
@@ -47,10 +52,5 @@ func newUpdateCmd() *cobra.Command {
 		},
 	}
 
-	setConnectorFlag(cmd)
-
-	cmd.Flags().String("connector-config", "", "File path to connector config file")
-	cmd.MarkFlagRequired("connector-config")
-	cmd.MarkFlagFilename("connector-config", "json")
 	return cmd
 }

@@ -4,29 +4,35 @@ import (
 	"encoding/json"
 	"os"
 
+	"github.com/darklore/kafka-connect-cli/pkg/cmd/util"
 	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
 	"github.com/spf13/cobra"
 )
 
 func newStatusCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "status",
+		Use:   "status [connector] [task id]",
 		Short: "Get a task status in a connector",
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		Args:  cobra.ExactValidArgs(2),
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
+			switch len(args) {
+			case 0:
+				return util.ValidConnectorArgs(cmd)
+			case 1:
+				connector := args[0]
+				return validateTaskArgs(cmd, connector)
+			default:
+				return nil, cobra.ShellCompDirectiveNoFileComp
+			}
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
 			endpoint, err := cmd.Root().PersistentFlags().GetString("endpoint")
 			if err != nil {
 				return err
 			}
 
-			connector, err := cmd.Flags().GetString("connector")
-			if err != nil {
-				return err
-			}
-
-			taskID, err := getTaskID(cmd)
-			if err != nil {
-				return err
-			}
+			connector := args[0]
+			taskID := args[1]
 
 			tasks, err := connect.GetTaskStatus(endpoint, connector, taskID)
 			if err != nil {
@@ -41,7 +47,5 @@ func newStatusCmd() *cobra.Command {
 		},
 	}
 
-	setConnectorFlag(cmd)
-	setTaskIDFlag(cmd)
 	return cmd
 }

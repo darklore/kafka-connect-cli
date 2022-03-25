@@ -4,23 +4,29 @@ import (
 	"encoding/json"
 	"os"
 
+	"github.com/darklore/kafka-connect-cli/pkg/cmd/util"
 	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
 	"github.com/spf13/cobra"
 )
 
 func newStatusCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "status",
+		Use:   "status [connector]",
 		Short: "Get a connector's status",
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		Args:  cobra.ExactValidArgs(1),
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
+			if len(args) == 0 {
+				return util.ValidConnectorArgs(cmd)
+			}
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
 			endpoint, err := cmd.Root().PersistentFlags().GetString("endpoint")
 			if err != nil {
 				return err
 			}
-			connector, err := cmd.Flags().GetString("connector")
-			if err != nil {
-				return err
-			}
+
+			connector := args[0]
 
 			status, err := connect.GetConnectorStatus(endpoint, connector)
 			if err != nil {
@@ -34,6 +40,6 @@ func newStatusCmd() *cobra.Command {
 			return nil
 		},
 	}
-	setConnectorFlag(cmd)
+
 	return cmd
 }

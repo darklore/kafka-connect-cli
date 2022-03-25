@@ -10,18 +10,22 @@ import (
 
 func newCreateCmd() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "create",
+		Use:   "create [connector config json]",
 		Short: "Create a new connector",
-		RunE: func(cmd *cobra.Command, _ []string) error {
+		Args:  cobra.ExactValidArgs(1),
+		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+			if len(args) == 0 {
+				return []string{"json"}, cobra.ShellCompDirectiveFilterFileExt
+			}
+			return nil, cobra.ShellCompDirectiveNoFileComp
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
 			endpoint, err := cmd.Root().PersistentFlags().GetString("endpoint")
 			if err != nil {
 				return err
 			}
 
-			fileName, err := cmd.Flags().GetString("connector-config")
-			if err != nil {
-				return err
-			}
+			fileName := args[0]
 
 			configFile, err := os.Open(fileName)
 			if err != nil {
@@ -42,8 +46,5 @@ func newCreateCmd() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().String("connector-config", "", "File path to connector config file")
-	cmd.MarkFlagRequired("connector-config")
-	cmd.MarkFlagFilename("connector-config", "json")
 	return cmd
 }
