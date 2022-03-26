@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"runtime/debug"
@@ -25,7 +24,7 @@ func main() {
 
 	c := cmd.NewCmd(version)
 	if err := c.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, "Error:", err)
+		log.Printf("%+v", err)
 		os.Exit(1)
 	}
 }

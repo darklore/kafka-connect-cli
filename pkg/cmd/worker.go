@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 
+	"github.com/darklore/kafka-connect-cli/pkg/cmd/util"
 	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
 	"github.com/spf13/cobra"
 )
@@ -13,7 +14,7 @@ func newWorkerCmd() *cobra.Command {
 		Use:   "worker",
 		Short: "Get a connect worker information",
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			endpoint, err := cmd.Root().PersistentFlags().GetString("endpoint")
+			endpoint, err := util.GetEndpoint(cmd)
 			if err != nil {
 				return err
 			}
@@ -31,5 +32,6 @@ func newWorkerCmd() *cobra.Command {
 		},
 	}
 
+	util.AddEndpointFlag(cmd)
 	return cmd
 }
