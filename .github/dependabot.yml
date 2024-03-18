@@ -1,10 +1,13 @@
 version: 2
 updates:
   - directory: /
-    package-ecosystem: gomod
+    package-ecosystem: "gomod"
     schedule:
-      interval: weekly
+      day: "sunday"
+      interval: "weekly"
     groups:
       all:
         patterns:
           - "*"
+    reviewers:
+      - "darklore"
