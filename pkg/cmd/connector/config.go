@@ -14,7 +14,7 @@ func newConfigCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "config [connector]",
 		Short: "Get a connector's config",
-		Args:  cobra.ExactValidArgs(1),
+		Args:  cobra.MatchAll(cobra.ExactArgs(1)),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
 			if len(args) == 0 {
 				return util.ValidConnectorArgs(cmd)
@@ -22,14 +22,14 @@ func newConfigCmd() *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			endpoint, err := util.GetEndpoint(cmd)
+			cfg, err := util.GetOpenApiClientConfig(cmd)
 			if err != nil {
 				return err
 			}
 
 			connector := args[0]
 
-			config, err := connect.GetConnectorConfig(endpoint, connector)
+			config, err := connect.GetConnectorConfig2(cfg, connector)
 			if err != nil {
 				return err
 			}

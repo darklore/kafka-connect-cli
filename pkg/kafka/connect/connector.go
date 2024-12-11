@@ -22,7 +22,7 @@ type Connector struct {
 	Tasks  []Task          `json:"tasks"`
 }
 
-type ConnectorConfig map[string]string
+type ConnectorConfig = map[string]string
 
 type Task struct {
 	Connector string `json:"connector"`
@@ -211,6 +211,17 @@ func GetConnectorConfig(endpoint, name string) (*ConnectorConfig, error) {
 		return nil, errors.Wrap(err, "Faild to decode json")
 	}
 
+	return &config, nil
+}
+
+func GetConnectorConfig2(cfg *openapi.Configuration, name string) (*ConnectorConfig, error) {
+	client := openapi.NewAPIClient(cfg)
+	ctx := context.Background()
+
+	config, _, err := client.DefaultAPI.GetConnectorConfig(ctx, name).Execute()
+	if err != nil {
+		return nil, err
+	}
 	return &config, nil
 }
 
