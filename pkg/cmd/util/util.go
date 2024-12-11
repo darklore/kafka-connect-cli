@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
+	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect/openapi"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
@@ -24,12 +25,43 @@ func ValidConnectorArgs(cmd *cobra.Command) ([]string, cobra.ShellCompDirective)
 	return connectors, cobra.ShellCompDirectiveNoFileComp
 }
 
+func AddEndpointSchemeFlag(cmd *cobra.Command) {
+	cmd.PersistentFlags().String("scheme", "http", "scheme of the endpoint url")
+}
+
 func AddEndpointFlag(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringP("endpoint", "e", "http://localhost:8083", "Kafka connect REST endpoint")
 }
 
+func AddEndpointHostFlag(cmd *cobra.Command) {
+	cmd.PersistentFlags().String("host", "localhost:8083", "Kafka connect REST endpoint")
+}
+
+func GetEndpointScheme(cmd *cobra.Command) (string, error) {
+	return cmd.InheritedFlags().GetString("scheme")
+}
+
 func GetEndpoint(cmd *cobra.Command) (string, error) {
 	return cmd.InheritedFlags().GetString("endpoint")
+}
+
+func GetEndpointHost(cmd *cobra.Command) (string, error) {
+	return cmd.InheritedFlags().GetString("host")
+}
+
+func GetOpenApiClientConfig(cmd *cobra.Command) (*openapi.Configuration, error) {
+	scheme, err := cmd.InheritedFlags().GetString("scheme")
+	if err != nil {
+		return nil, err
+	}
+	host, err := cmd.InheritedFlags().GetString("host")
+	if err != nil {
+		return nil, err
+	}
+	cfg := openapi.NewConfiguration()
+	cfg.Host = host
+	cfg.Scheme = scheme
+	return cfg, nil
 }
 
 func AddOutputFormatFlag(cmd *cobra.Command) {

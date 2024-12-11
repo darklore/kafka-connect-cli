@@ -14,12 +14,13 @@ func newConnectorPluginListCmd() *cobra.Command {
 		Use:   "list",
 		Short: "List connector plugins",
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			endpoint, err := util.GetEndpoint(cmd)
+			// endpoint, err := util.GetEndpoint(cmd)
+			cfg, err := util.GetOpenApiClientConfig(cmd)
 			if err != nil {
 				return err
 			}
 
-			plugins, err := connect.ListConnectorPlugin(endpoint)
+			plugins, err := connect.ListConnectorPlugin2(cfg)
 			if err != nil {
 				return err
 			}

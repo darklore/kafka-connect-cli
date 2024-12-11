@@ -1,10 +1,13 @@
 package connect
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/url"
 	"path"
+
+	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect/openapi"
 )
 
 type ConnectorPlugin struct {
@@ -28,6 +31,18 @@ func ListConnectorPlugin(endpoint string) ([]ConnectorPlugin, error) {
 
 	var plugins []ConnectorPlugin
 	if err := json.NewDecoder(resp.Body).Decode(&plugins); err != nil {
+		return nil, err
+	}
+
+	return plugins, nil
+}
+
+func ListConnectorPlugin2(cfg *openapi.Configuration) ([]openapi.PluginInfo, error) {
+	client := openapi.NewAPIClient(cfg)
+	ctx := context.Background()
+	req := client.DefaultAPI.ListConnectorPlugins(ctx)
+	plugins, _, err := req.Execute()
+	if err != nil {
 		return nil, err
 	}
 

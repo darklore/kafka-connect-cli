@@ -12,6 +12,8 @@ func NewConnectorPluginCmd() *cobra.Command {
 	}
 
 	util.AddEndpointFlag(cmd)
+	util.AddEndpointHostFlag(cmd)
+	util.AddEndpointSchemeFlag(cmd)
 	cmd.AddCommand(newConnectorPluginListCmd())
 	return cmd
 }
