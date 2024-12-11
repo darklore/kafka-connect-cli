@@ -91,6 +91,23 @@ func CreateConnector(endpoint string, configJSON io.Reader) (*Connector, error) 
 	return &connector, nil
 }
 
+func CreateConnector2(cfg *openapi.Configuration, configJson io.Reader) (*openapi.ConnectorInfo, error) {
+	client := openapi.NewAPIClient(cfg)
+	ctx := context.Background()
+
+	var connectorReq openapi.CreateConnectorRequest
+	if err := json.NewDecoder(configJson).Decode(&connectorReq); err != nil {
+		return nil, errors.Wrap(err, "Failed decode json")
+	}
+
+	info, _, err := client.DefaultAPI.CreateConnector(ctx).CreateConnectorRequest(connectorReq).Execute()
+	if err != nil {
+		return nil, err
+	}
+
+	return info, err
+}
+
 func UpdateConnector(endpoint, name string, configJSON io.Reader) (*Connector, error) {
 	u, err := url.Parse(endpoint)
 	if err != nil {

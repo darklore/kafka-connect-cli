@@ -21,7 +21,7 @@ func newCreateCmd() *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			endpoint, err := util.GetEndpoint(cmd)
+			cfg, err := util.GetOpenApiClientConfig(cmd)
 			if err != nil {
 				return err
 			}
@@ -34,7 +34,7 @@ func newCreateCmd() *cobra.Command {
 			}
 			defer configFile.Close()
 
-			connector, err := connect.CreateConnector(endpoint, configFile)
+			connector, err := connect.CreateConnector2(cfg, configFile)
 			if err != nil {
 				return err
 			}
