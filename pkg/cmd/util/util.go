@@ -16,7 +16,7 @@ func ValidConnectorArgs(cmd *cobra.Command) ([]string, cobra.ShellCompDirective)
 		return []string{}, cobra.ShellCompDirectiveError
 	}
 
-	connectors, err := connect.ListConnectors(cfg)
+	connectors, err := connect.ListConnectorsOpenApi(cfg)
 	if err != nil {
 		log.Println(err)
 		return []string{}, cobra.ShellCompDirectiveError

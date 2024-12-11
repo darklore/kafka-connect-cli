@@ -12,7 +12,7 @@ func newDeleteCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "delete [connector]",
 		Short: "Delete a connector",
-		Args:  cobra.ExactValidArgs(1),
+		Args:  cobra.MatchAll(cobra.ExactArgs(1)),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
 			if len(args) == 0 {
 				return util.ValidConnectorArgs(cmd)
@@ -20,14 +20,14 @@ func newDeleteCmd() *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			endpoint, err := util.GetEndpoint(cmd)
+			cfg, err := util.GetOpenApiClientConfig(cmd)
 			if err != nil {
 				return err
 			}
 
 			connector := args[0]
 
-			if err := connect.DeleteConnector(endpoint, connector); err != nil {
+			if err := connect.DeleteConnectorOpenApi(cfg, connector); err != nil {
 				return err
 			}
 

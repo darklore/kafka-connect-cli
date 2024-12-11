@@ -177,7 +177,7 @@ func ListConnectorNames(endpoint string) ([]ConnectorName, error) {
 	return connectors, nil
 }
 
-func ListConnectors(cfg *openapi.Configuration) ([]ConnectorName, error) {
+func ListConnectorsOpenApi(cfg *openapi.Configuration) ([]ConnectorName, error) {
 	client := openapi.NewAPIClient(cfg)
 	ctx := context.Background()
 
@@ -210,6 +210,17 @@ func GetConnector(endpoint, name string) (*Connector, error) {
 	return &connector, nil
 }
 
+func GetConnectorOpenApi(cfg *openapi.Configuration, name string) (*openapi.ConnectorInfo, error) {
+	client := openapi.NewAPIClient(cfg)
+	ctx := context.Background()
+
+	connector, _, err := client.DefaultAPI.GetConnector(ctx, name).Execute()
+	if err != nil {
+		return nil, err
+	}
+	return connector, nil
+}
+
 func GetConnectorConfig(endpoint, name string) (*ConnectorConfig, error) {
 	u, err := url.Parse(endpoint)
 	if err != nil {
@@ -231,7 +242,7 @@ func GetConnectorConfig(endpoint, name string) (*ConnectorConfig, error) {
 	return &config, nil
 }
 
-func GetConnectorConfig2(cfg *openapi.Configuration, name string) (*ConnectorConfig, error) {
+func GetConnectorConfigOpenApi(cfg *openapi.Configuration, name string) (*ConnectorConfig, error) {
 	client := openapi.NewAPIClient(cfg)
 	ctx := context.Background()
 
@@ -382,6 +393,26 @@ func DeleteConnector(endpoint, name string) error {
 		return fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
 	}
 
+	return nil
+}
+
+func DeleteConnectorOpenApi(cfg *openapi.Configuration, name string) error {
+	client := openapi.NewAPIClient(cfg)
+	ctx := context.Background()
+
+	resp, err := client.DefaultAPI.DestroyConnector(ctx, name).Execute()
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusNoContent {
+		var errorMsg Error
+		if err := json.NewDecoder(resp.Body).Decode(&errorMsg); err != nil {
+			return errors.Wrap(err, "Failed to decode json")
+		}
+		return fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
+	}
 	return nil
 }
 

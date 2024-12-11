@@ -29,7 +29,7 @@ func newConfigCmd() *cobra.Command {
 
 			connector := args[0]
 
-			config, err := connect.GetConnectorConfig2(cfg, connector)
+			config, err := connect.GetConnectorConfigOpenApi(cfg, connector)
 			if err != nil {
 				return err
 			}

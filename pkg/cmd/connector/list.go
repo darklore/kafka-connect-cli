@@ -19,7 +19,7 @@ func newListCmd() *cobra.Command {
 				return err
 			}
 
-			connectors, err := connect.ListConnectors(cfg)
+			connectors, err := connect.ListConnectorsOpenApi(cfg)
 			if err != nil {
 				return err
 			}
