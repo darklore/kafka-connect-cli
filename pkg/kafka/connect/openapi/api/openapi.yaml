@@ -161,7 +161,11 @@ paths:
       responses:
         default:
           content:
-            application/json: {}
+            application/json:
+              schema:
+                items:
+                  type: string
+                type: array
           description: default response
       summary: List all active connectors
     post:

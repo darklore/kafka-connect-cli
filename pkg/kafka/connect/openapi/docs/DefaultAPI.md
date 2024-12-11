@@ -1034,7 +1034,7 @@ No authorization required
 
 ## ListConnectors
 
-> ListConnectors(ctx).Execute()
+> []string ListConnectors(ctx).Execute()
 
 List all active connectors
 
@@ -1054,11 +1054,13 @@ func main() {
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.DefaultAPI.ListConnectors(context.Background()).Execute()
+	resp, r, err := apiClient.DefaultAPI.ListConnectors(context.Background()).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `DefaultAPI.ListConnectors``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
+	// response from `ListConnectors`: []string
+	fmt.Fprintf(os.Stdout, "Response from `DefaultAPI.ListConnectors`: %v\n", resp)
 }
 ```
 
@@ -1073,7 +1075,7 @@ Other parameters are passed through a pointer to a apiListConnectorsRequest stru
 
 ### Return type
 
- (empty response body)
+**[]string**
 
 ### Authorization
 
