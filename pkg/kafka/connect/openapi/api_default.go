@@ -133,7 +133,7 @@ func (r ApiCreateConnectorRequest) CreateConnectorRequest(createConnectorRequest
 	return r
 }
 
-func (r ApiCreateConnectorRequest) Execute() (*http.Response, error) {
+func (r ApiCreateConnectorRequest) Execute() (*ConnectorInfo, *http.Response, error) {
 	return r.ApiService.CreateConnectorExecute(r)
 }
 
@@ -151,16 +151,18 @@ func (a *DefaultAPIService) CreateConnector(ctx context.Context) ApiCreateConnec
 }
 
 // Execute executes the request
-func (a *DefaultAPIService) CreateConnectorExecute(r ApiCreateConnectorRequest) (*http.Response, error) {
+//  @return ConnectorInfo
+func (a *DefaultAPIService) CreateConnectorExecute(r ApiCreateConnectorRequest) (*ConnectorInfo, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}
 		formFiles            []formFile
+		localVarReturnValue  *ConnectorInfo
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.CreateConnector")
 	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/connectors"
@@ -190,19 +192,19 @@ func (a *DefaultAPIService) CreateConnectorExecute(r ApiCreateConnectorRequest) 
 	localVarPostBody = r.createConnectorRequest
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
-		return nil, err
+		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(req)
 	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
@@ -210,10 +212,27 @@ func (a *DefaultAPIService) CreateConnectorExecute(r ApiCreateConnectorRequest) 
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		return localVarHTTPResponse, newErr
+			var v ConnectorInfo
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
-	return localVarHTTPResponse, nil
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
 type ApiDestroyConnectorRequest struct {

@@ -13,7 +13,7 @@ func newCreateCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create [connector config json]",
 		Short: "Create a new connector",
-		Args:  cobra.ExactValidArgs(1),
+		Args:  cobra.MatchAll(cobra.ExactArgs(1)),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			if len(args) == 0 {
 				return []string{"json"}, cobra.ShellCompDirectiveFilterFileExt

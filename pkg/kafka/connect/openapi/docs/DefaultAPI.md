@@ -106,7 +106,7 @@ No authorization required
 
 ## CreateConnector
 
-> CreateConnector(ctx).CreateConnectorRequest(createConnectorRequest).Execute()
+> ConnectorInfo CreateConnector(ctx).CreateConnectorRequest(createConnectorRequest).Execute()
 
 Create a new connector
 
@@ -127,11 +127,13 @@ func main() {
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.DefaultAPI.CreateConnector(context.Background()).CreateConnectorRequest(createConnectorRequest).Execute()
+	resp, r, err := apiClient.DefaultAPI.CreateConnector(context.Background()).CreateConnectorRequest(createConnectorRequest).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `DefaultAPI.CreateConnector``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
+	// response from `CreateConnector`: ConnectorInfo
+	fmt.Fprintf(os.Stdout, "Response from `DefaultAPI.CreateConnector`: %v\n", resp)
 }
 ```
 
@@ -150,7 +152,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
- (empty response body)
+[**ConnectorInfo**](ConnectorInfo.md)
 
 ### Authorization
 
