@@ -1,6 +1,7 @@
 package connect
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -8,6 +9,7 @@ import (
 	"net/url"
 	"path"
 
+	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect/openapi"
 	"github.com/pkg/errors"
 )
 
@@ -153,6 +155,18 @@ func ListConnectorNames(endpoint string) ([]ConnectorName, error) {
 	var connectors []ConnectorName
 	if err := json.NewDecoder(resp.Body).Decode(&connectors); err != nil {
 		return nil, errors.Wrap(err, "Faild to decode json")
+	}
+
+	return connectors, nil
+}
+
+func ListConnectors(cfg *openapi.Configuration) ([]ConnectorName, error) {
+	client := openapi.NewAPIClient(cfg)
+	ctx := context.Background()
+
+	connectors, _, err := client.DefaultAPI.ListConnectors(ctx).Execute()
+	if err != nil {
+		return nil, err
 	}
 
 	return connectors, nil

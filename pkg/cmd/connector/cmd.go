@@ -13,6 +13,8 @@ func NewCmd() *cobra.Command {
 	}
 
 	util.AddEndpointFlag(cmd)
+	util.AddEndpointSchemeFlag(cmd)
+	util.AddEndpointHostFlag(cmd)
 
 	// add subcommands
 	cmd.AddCommand(newListCmd())

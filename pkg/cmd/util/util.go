@@ -10,13 +10,13 @@ import (
 )
 
 func ValidConnectorArgs(cmd *cobra.Command) ([]string, cobra.ShellCompDirective) {
-	endpoint, err := GetEndpoint(cmd)
+	cfg, err := GetOpenApiClientConfig(cmd)
 	if err != nil {
 		log.Printf("%+v", errors.Wrap(err, ""))
 		return []string{}, cobra.ShellCompDirectiveError
 	}
 
-	connectors, err := connect.ListConnectorNames(endpoint)
+	connectors, err := connect.ListConnectors(cfg)
 	if err != nil {
 		log.Println(err)
 		return []string{}, cobra.ShellCompDirectiveError
@@ -29,24 +29,24 @@ func AddEndpointSchemeFlag(cmd *cobra.Command) {
 	cmd.PersistentFlags().String("scheme", "http", "scheme of the endpoint url")
 }
 
-func AddEndpointFlag(cmd *cobra.Command) {
-	cmd.PersistentFlags().StringP("endpoint", "e", "http://localhost:8083", "Kafka connect REST endpoint")
-}
-
 func AddEndpointHostFlag(cmd *cobra.Command) {
 	cmd.PersistentFlags().String("host", "localhost:8083", "Kafka connect REST endpoint")
+}
+
+func AddEndpointFlag(cmd *cobra.Command) {
+	cmd.PersistentFlags().StringP("endpoint", "e", "http://localhost:8083", "Kafka connect REST endpoint")
 }
 
 func GetEndpointScheme(cmd *cobra.Command) (string, error) {
 	return cmd.InheritedFlags().GetString("scheme")
 }
 
-func GetEndpoint(cmd *cobra.Command) (string, error) {
-	return cmd.InheritedFlags().GetString("endpoint")
-}
-
 func GetEndpointHost(cmd *cobra.Command) (string, error) {
 	return cmd.InheritedFlags().GetString("host")
+}
+
+func GetEndpoint(cmd *cobra.Command) (string, error) {
+	return cmd.InheritedFlags().GetString("endpoint")
 }
 
 func GetOpenApiClientConfig(cmd *cobra.Command) (*openapi.Configuration, error) {

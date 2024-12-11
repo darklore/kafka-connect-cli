@@ -14,12 +14,12 @@ func newListCmd() *cobra.Command {
 		Use:   "list",
 		Short: "List connectors' name",
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			endpoint, err := util.GetEndpoint(cmd)
+			cfg, err := util.GetOpenApiClientConfig(cmd)
 			if err != nil {
 				return err
 			}
 
-			connectors, err := connect.ListConnectorNames(endpoint)
+			connectors, err := connect.ListConnectors(cfg)
 			if err != nil {
 				return err
 			}
