@@ -13,7 +13,7 @@ func newPauseCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "pause [connector]",
 		Short: "Pause a connector",
-		Args:  cobra.ExactValidArgs(1),
+		Args:  cobra.MatchAll(cobra.ExactArgs(1)),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
 			if len(args) == 0 {
 				return util.ValidConnectorArgs(cmd)
