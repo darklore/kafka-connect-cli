@@ -34,7 +34,7 @@ func newCreateCmd() *cobra.Command {
 			}
 			defer configFile.Close()
 
-			connector, err := connect.CreateConnector2(cfg, configFile)
+			connector, err := connect.CreateConnectorOpenApi(cfg, configFile)
 			if err != nil {
 				return err
 			}

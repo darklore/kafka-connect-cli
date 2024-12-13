@@ -245,9 +245,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              additionalProperties:
-                type: string
+              $ref: "#/components/schemas/PutConnectorConfigRequest"
       responses:
         default:
           content:
@@ -668,13 +666,15 @@ components:
         task:
           type: integer
           format: int32
+    ConnectorConfig:
+      type: object
+      additionalProperties:
+        type: string
     CreateConnectorRequest:
       type: object
       properties:
         config:
-          type: object
-          additionalProperties:
-            type: string
+          $ref: "#/components/schemas/ConnectorConfig"
         initial_state:
           type: string
           enum:
@@ -683,6 +683,8 @@ components:
             - STOPPED
         name:
           type: string
+    PutConnectorConfigRequest:
+      $ref: "#/components/schemas/ConnectorConfig"
     PluginInfo:
       type: object
       properties:

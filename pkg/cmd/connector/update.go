@@ -13,7 +13,7 @@ func newUpdateCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update [connector name] [connector config json]",
 		Short: "Update or create a connector",
-		Args:  cobra.ExactValidArgs(2),
+		Args:  cobra.MatchAll(cobra.ExactArgs(2)),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
 			switch len(args) {
 			case 0:

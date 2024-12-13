@@ -275,9 +275,7 @@ paths:
         content:
           application/json:
             schema:
-              additionalProperties:
-                type: string
-              type: object
+              $ref: '#/components/schemas/PutConnectorConfigRequest'
       responses:
         default:
           content:
@@ -899,6 +897,10 @@ components:
           format: int32
           type: integer
       type: object
+    ConnectorConfig:
+      additionalProperties:
+        type: string
+      type: object
     CreateConnectorRequest:
       example:
         initial_state: RUNNING
@@ -919,6 +921,8 @@ components:
         name:
           type: string
       type: object
+    PutConnectorConfigRequest:
+      $ref: '#/components/schemas/ConnectorConfig'
     PluginInfo:
       example:
         type: type

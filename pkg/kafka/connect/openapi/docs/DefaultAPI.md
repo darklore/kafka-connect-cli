@@ -1288,7 +1288,7 @@ No authorization required
 
 ## PutConnectorConfig
 
-> PutConnectorConfig(ctx, connector).RequestBody(requestBody).Execute()
+> PutConnectorConfig(ctx, connector).Body(body).Execute()
 
 Create or reconfigure the specified connector
 
@@ -1306,11 +1306,11 @@ import (
 
 func main() {
 	connector := "connector_example" // string | 
-	requestBody := map[string]string{"key": "Inner_example"} // map[string]string |  (optional)
+	body := map[string]string{ ... } // map[string]string |  (optional)
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.DefaultAPI.PutConnectorConfig(context.Background(), connector).RequestBody(requestBody).Execute()
+	r, err := apiClient.DefaultAPI.PutConnectorConfig(context.Background(), connector).Body(body).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `DefaultAPI.PutConnectorConfig``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
@@ -1334,7 +1334,7 @@ Other parameters are passed through a pointer to a apiPutConnectorConfigRequest 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
 
- **requestBody** | **map[string]string** |  | 
+ **body** | **map[string]string** |  | 
 
 ### Return type
 

@@ -91,7 +91,7 @@ func CreateConnector(endpoint string, configJSON io.Reader) (*Connector, error) 
 	return &connector, nil
 }
 
-func CreateConnector2(cfg *openapi.Configuration, configJson io.Reader) (*openapi.ConnectorInfo, error) {
+func CreateConnectorOpenApi(cfg *openapi.Configuration, configJson io.Reader) (*openapi.ConnectorInfo, error) {
 	client := openapi.NewAPIClient(cfg)
 	ctx := context.Background()
 

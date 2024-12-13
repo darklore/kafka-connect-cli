@@ -1973,11 +1973,11 @@ type ApiPutConnectorConfigRequest struct {
 	ctx context.Context
 	ApiService *DefaultAPIService
 	connector string
-	requestBody *map[string]string
+	body *map[string]string
 }
 
-func (r ApiPutConnectorConfigRequest) RequestBody(requestBody map[string]string) ApiPutConnectorConfigRequest {
-	r.requestBody = &requestBody
+func (r ApiPutConnectorConfigRequest) Body(body map[string]string) ApiPutConnectorConfigRequest {
+	r.body = &body
 	return r
 }
 
@@ -2038,7 +2038,7 @@ func (a *DefaultAPIService) PutConnectorConfigExecute(r ApiPutConnectorConfigReq
 		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
 	}
 	// body params
-	localVarPostBody = r.requestBody
+	localVarPostBody = r.body
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
 		return nil, err
