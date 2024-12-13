@@ -273,6 +273,17 @@ func GetConnectorStatus(endpoint, name string) (*ConnectorStatus, error) {
 
 	return &status, nil
 }
+func GetConnectorStatusOpenApi(cfg *openapi.Configuration, name string) (*openapi.ConnectorStateInfo, error) {
+	client := openapi.NewAPIClient(cfg)
+	ctx := context.Background()
+
+	status, _, err := client.DefaultAPI.GetConnectorStatus(ctx, name).Execute()
+	if err != nil {
+		return nil, err
+	}
+
+	return status, nil
+}
 
 func RestartConnector(endpoint, name string) error {
 	u, err := url.Parse(endpoint)
@@ -396,6 +407,30 @@ func ResumeConnector(endpoint, name string) error {
 		return errors.Wrap(err, "Failed to create http request")
 	}
 	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return errors.Wrap(err, "Failed to do http request")
+	}
+	defer resp.Body.Close()
+
+	var r io.Reader = resp.Body
+	//r = io.TeeReader(resp.Body, os.Stderr)
+
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		var errorMsg Error
+		if err := json.NewDecoder(r).Decode(&errorMsg); err != nil {
+			return errors.Wrap(err, "Failed to decode json")
+		}
+		return fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
+	}
+
+	return nil
+}
+
+func ResumeConnectorOpenApi(cfg *openapi.Configuration, name string) error {
+	client := openapi.NewAPIClient(cfg)
+	ctx := context.Background()
+
+	resp, err := client.DefaultAPI.ResumeConnector(ctx, name).Execute()
 	if err != nil {
 		return errors.Wrap(err, "Failed to do http request")
 	}
@@ -554,6 +589,22 @@ func ListTopics(endpoint, name string) ([]string, error) {
 
 	u.Path = path.Join(u.Path, "connectors", name, "topics")
 	resp, err := http.Get(u.String())
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to do http request")
+	}
+	defer resp.Body.Close()
+
+	var taskTopics TaskTopics
+	if err := json.NewDecoder(resp.Body).Decode(&taskTopics); err != nil {
+		return nil, errors.Wrap(err, "Failed to decode json")
+	}
+
+	return taskTopics[name].Topics, nil
+}
+
+func ListTopicsOpenApi(cfg *openapi.Configuration, name string) ([]string, error) {
+	client := openapi.NewAPIClient(cfg)
+	resp, err := client.DefaultAPI.GetConnectorActiveTopics(context.Background(), name).Execute()
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to do http request")
 	}
