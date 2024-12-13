@@ -14,49 +14,7 @@ import (
 
 type ConnectorName = string
 
-type Connector struct {
-	Name   ConnectorName   `json:"name"`
-	Config ConnectorConfig `json:"config"`
-	Type   string          `json:"type"`
-	Tasks  []Task          `json:"tasks"`
-}
-
 type ConnectorConfig = map[string]string
-
-type Task struct {
-	Connector string `json:"connector"`
-	ID        int    `json:"task"`
-}
-
-type ConnectorStatus struct {
-	Name  string         `json:"name"`
-	State ConnectorState `json:"connector"`
-	Tasks []TaskState    `json:"tasks"`
-	Type  string         `json:"type"`
-}
-
-type ConnectorState struct {
-	State    string `json:"state"`
-	WorkerID string `json:"worker_id"`
-}
-
-type TaskState struct {
-	ID       int    `json:"id"`
-	State    string `json:"state"`
-	WorkerID string `json:"worker_id"`
-}
-
-type TaskInfo struct {
-	ID     Task       `json:"id"`
-	Config TaskConfig `json:"config"`
-}
-
-type TaskConfig map[string]string
-
-type TaskTopics map[string]Topics
-type Topics struct {
-	Topics []string `json:"topics"`
-}
 
 func CreateConnectorOpenApi(cfg *openapi.Configuration, configJson io.Reader) (*openapi.ConnectorInfo, error) {
 	client := openapi.NewAPIClient(cfg)
