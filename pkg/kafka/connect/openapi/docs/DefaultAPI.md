@@ -1288,7 +1288,7 @@ No authorization required
 
 ## PutConnectorConfig
 
-> PutConnectorConfig(ctx, connector).Body(body).Execute()
+> ConnectorInfo PutConnectorConfig(ctx, connector).Body(body).Execute()
 
 Create or reconfigure the specified connector
 
@@ -1310,11 +1310,13 @@ func main() {
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.DefaultAPI.PutConnectorConfig(context.Background(), connector).Body(body).Execute()
+	resp, r, err := apiClient.DefaultAPI.PutConnectorConfig(context.Background(), connector).Body(body).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `DefaultAPI.PutConnectorConfig``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
+	// response from `PutConnectorConfig`: ConnectorInfo
+	fmt.Fprintf(os.Stdout, "Response from `DefaultAPI.PutConnectorConfig`: %v\n", resp)
 }
 ```
 
@@ -1338,7 +1340,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
- (empty response body)
+[**ConnectorInfo**](ConnectorInfo.md)
 
 ### Authorization
 

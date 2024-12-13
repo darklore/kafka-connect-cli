@@ -249,7 +249,9 @@ paths:
       responses:
         default:
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConnectorInfo"
           description: default response
       summary: Create or reconfigure the specified connector
   /connectors/{connector}/offsets:

@@ -37,11 +37,10 @@ func ListConnectorPlugin(endpoint string) ([]ConnectorPlugin, error) {
 	return plugins, nil
 }
 
-func ListConnectorPlugin2(cfg *openapi.Configuration) ([]openapi.PluginInfo, error) {
+func ListConnectorPluginOpenApi(cfg *openapi.Configuration) ([]openapi.PluginInfo, error) {
 	client := openapi.NewAPIClient(cfg)
 	ctx := context.Background()
-	req := client.DefaultAPI.ListConnectorPlugins(ctx)
-	plugins, _, err := req.Execute()
+	plugins, _, err := client.DefaultAPI.ListConnectorPlugins(ctx).Execute()
 	if err != nil {
 		return nil, err
 	}

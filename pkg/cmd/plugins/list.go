@@ -20,7 +20,7 @@ func newConnectorPluginListCmd() *cobra.Command {
 				return err
 			}
 
-			plugins, err := connect.ListConnectorPlugin2(cfg)
+			plugins, err := connect.ListConnectorPluginOpenApi(cfg)
 			if err != nil {
 				return err
 			}

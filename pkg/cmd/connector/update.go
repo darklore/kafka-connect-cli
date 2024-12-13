@@ -25,7 +25,7 @@ func newUpdateCmd() *cobra.Command {
 			}
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			endpoint, err := util.GetEndpoint(cmd)
+			cfg, err := util.GetOpenApiClientConfig(cmd)
 			if err != nil {
 				return err
 			}
@@ -39,7 +39,7 @@ func newUpdateCmd() *cobra.Command {
 			}
 			defer configFile.Close()
 
-			connector, err := connect.UpdateConnector(endpoint, connectorName, configFile)
+			connector, err := connect.UpdateConnectorOpenApi(cfg, connectorName, configFile)
 			if err != nil {
 				return err
 			}

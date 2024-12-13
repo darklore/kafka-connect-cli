@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"os"
 	"path"
 
 	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect/openapi"
@@ -141,6 +142,22 @@ func UpdateConnector(endpoint, name string, configJSON io.Reader) (*Connector, e
 	}
 
 	return &connector, nil
+}
+
+func UpdateConnectorOpenApi(cfg *openapi.Configuration, name string, configJson io.Reader) (*openapi.ConnectorInfo, error) {
+	client := openapi.NewAPIClient(cfg)
+
+	var connectorConfig ConnectorConfig
+	if err := json.NewDecoder(configJson).Decode(&connectorConfig); err != nil {
+		return nil, errors.Wrap(err, "Failed decode json")
+	}
+
+	info, _, err := client.DefaultAPI.PutConnectorConfig(context.Background(), name).Body(connectorConfig).Execute()
+	if err != nil {
+		return nil, err
+	}
+
+	return info, err
 }
 
 func ListConnectorNames(endpoint string) ([]ConnectorName, error) {
@@ -326,8 +343,8 @@ func RestartConnectorOpenApi(cfg *openapi.Configuration, name string) error {
 	}
 	defer resp.Body.Close()
 
-	var r io.Reader = resp.Body
-	// r = io.TeeReader(resp.Body, os.Stderr)
+	// var r io.Reader = resp.Body
+	var r = io.TeeReader(resp.Body, os.Stderr)
 
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
 		var errorMsg Error
@@ -381,8 +398,8 @@ func PauseConnectorOpenApi(cfg *openapi.Configuration, name string) error {
 	}
 	defer resp.Body.Close()
 
-	var r io.Reader = resp.Body
-	//r = io.TeeReader(resp.Body, os.Stderr)
+	// var r io.Reader = resp.Body
+	var r = io.TeeReader(resp.Body, os.Stderr)
 
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
 		var errorMsg Error
@@ -436,8 +453,8 @@ func ResumeConnectorOpenApi(cfg *openapi.Configuration, name string) error {
 	}
 	defer resp.Body.Close()
 
-	var r io.Reader = resp.Body
-	//r = io.TeeReader(resp.Body, os.Stderr)
+	// var r io.Reader = resp.Body
+	var r = io.TeeReader(resp.Body, os.Stderr)
 
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
 		var errorMsg Error
@@ -489,9 +506,12 @@ func DeleteConnectorOpenApi(cfg *openapi.Configuration, name string) error {
 	}
 	defer resp.Body.Close()
 
+	// var r = resp.Body
+	var r = io.TeeReader(resp.Body, os.Stderr)
+
 	if resp.StatusCode != http.StatusNoContent {
 		var errorMsg Error
-		if err := json.NewDecoder(resp.Body).Decode(&errorMsg); err != nil {
+		if err := json.NewDecoder(r).Decode(&errorMsg); err != nil {
 			return errors.Wrap(err, "Failed to decode json")
 		}
 		return fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
@@ -517,6 +537,16 @@ func ListTasks(endpoint, name string) ([]TaskInfo, error) {
 		return nil, errors.Wrap(err, "Failed to decode json")
 	}
 
+	return tasks, nil
+}
+
+func GetTaskConfigs(cfg *openapi.Configuration, name string) ([]openapi.TaskInfo, error) {
+	client := openapi.NewAPIClient(cfg)
+
+	tasks, _, err := client.DefaultAPI.GetTaskConfigs(context.Background(), name).Execute()
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to get task configs")
+	}
 	return tasks, nil
 }
 
@@ -550,6 +580,15 @@ func GetTaskStatus(endpoint, name, id string) (*TaskState, error) {
 	return &task, nil
 }
 
+func GetTaskStatusOpenApi(cfg *openapi.Configuration, connector string, taskID int32) (*openapi.TaskState, error) {
+	client := openapi.NewAPIClient(cfg)
+	state, _, err := client.DefaultAPI.GetTaskStatus(context.Background(), connector, taskID).Execute()
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to get task status")
+	}
+	return state, nil
+}
+
 func RestartTask(endpoint, name, id string) error {
 	u, err := url.Parse(endpoint)
 	if err != nil {
@@ -569,6 +608,28 @@ func RestartTask(endpoint, name, id string) error {
 
 	var r io.Reader = resp.Body
 	// r = io.TeeReader(resp.Body, os.Stderr)
+
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		var errorMsg Error
+		if err := json.NewDecoder(r).Decode(&errorMsg); err != nil {
+			return errors.Wrap(err, "Failed to decode json")
+		}
+		return fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
+	}
+
+	return nil
+}
+
+func RestartTaskOpenApi(cfg *openapi.Configuration, connector string, taskId int32) error {
+	client := openapi.NewAPIClient(cfg)
+	resp, err := client.DefaultAPI.RestartTask(context.Background(), connector, taskId).Execute()
+	if err != nil {
+		return errors.Wrap(err, "Failed to do http request")
+	}
+	defer resp.Body.Close()
+
+	// var r io.Reader = resp.Body
+	var r = io.TeeReader(resp.Body, os.Stderr)
 
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
 		var errorMsg Error
@@ -610,8 +671,11 @@ func ListTopicsOpenApi(cfg *openapi.Configuration, name string) ([]string, error
 	}
 	defer resp.Body.Close()
 
+	// var r = resp.Body
+	var r = io.TeeReader(resp.Body, os.Stderr)
+
 	var taskTopics TaskTopics
-	if err := json.NewDecoder(resp.Body).Decode(&taskTopics); err != nil {
+	if err := json.NewDecoder(r).Decode(&taskTopics); err != nil {
 		return nil, errors.Wrap(err, "Failed to decode json")
 	}
 
