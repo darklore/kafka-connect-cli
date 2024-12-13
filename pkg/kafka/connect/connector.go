@@ -6,9 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"os"
-	"path"
 
 	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect/openapi"
 	"github.com/pkg/errors"
@@ -60,38 +58,6 @@ type Topics struct {
 	Topics []string `json:"topics"`
 }
 
-func CreateConnector(endpoint string, configJSON io.Reader) (*Connector, error) {
-	u, err := url.Parse(endpoint)
-	if err != nil {
-		return nil, errors.Wrap(err, "Failed to parse url")
-	}
-
-	u.Path = path.Join(u.Path, "connectors")
-	resp, err := http.Post(u.String(), "application/json", configJSON)
-	if err != nil {
-		return nil, errors.Wrap(err, "Failed to do http request")
-	}
-	defer resp.Body.Close()
-
-	var r io.Reader = resp.Body
-	//r = io.TeeReader(resp.Body, os.Stderr)
-
-	if resp.StatusCode != http.StatusCreated {
-		var errorMsg Error
-		if err := json.NewDecoder(r).Decode(&errorMsg); err != nil {
-			return nil, errors.Wrap(err, "Failed to decode json")
-		}
-		return nil, fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
-	}
-
-	var connector Connector
-	if err := json.NewDecoder(r).Decode(&connector); err != nil {
-		return nil, errors.Wrap(err, "Faild to decode json")
-	}
-
-	return &connector, nil
-}
-
 func CreateConnectorOpenApi(cfg *openapi.Configuration, configJson io.Reader) (*openapi.ConnectorInfo, error) {
 	client := openapi.NewAPIClient(cfg)
 	ctx := context.Background()
@@ -107,41 +73,6 @@ func CreateConnectorOpenApi(cfg *openapi.Configuration, configJson io.Reader) (*
 	}
 
 	return info, err
-}
-
-func UpdateConnector(endpoint, name string, configJSON io.Reader) (*Connector, error) {
-	u, err := url.Parse(endpoint)
-	if err != nil {
-		return nil, errors.Wrap(err, "Failed to parse url")
-	}
-
-	u.Path = path.Join(u.Path, "connectors", name, "config")
-	req, err := http.NewRequest(http.MethodPut, u.String(), configJSON)
-	if err != nil {
-		return nil, errors.Wrap(err, "Failed to create http request")
-	}
-	req.Header.Add("Content-Type", "application/json")
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, errors.Wrap(err, "Failed to do http request")
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		var errorMsg Error
-		if err := json.NewDecoder(resp.Body).Decode(&errorMsg); err != nil {
-			return nil, errors.Wrap(err, "Failed to decode json")
-		}
-		return nil, fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
-	}
-
-	var connector Connector
-	if err := json.NewDecoder(resp.Body).Decode(&connector); err != nil {
-		return nil, errors.Wrap(err, "Faild to decode json")
-	}
-
-	return &connector, nil
 }
 
 func UpdateConnectorOpenApi(cfg *openapi.Configuration, name string, configJson io.Reader) (*openapi.ConnectorInfo, error) {
@@ -160,40 +91,6 @@ func UpdateConnectorOpenApi(cfg *openapi.Configuration, name string, configJson 
 	return info, err
 }
 
-func ListConnectorNames(endpoint string) ([]ConnectorName, error) {
-	u, err := url.Parse(endpoint)
-	if err != nil {
-		return nil, errors.Wrap(err, "Failed to parse url")
-	}
-
-	u.Path = path.Join(u.Path, "connectors")
-	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
-	if err != nil {
-		return nil, errors.Wrap(err, "Failed to create http request")
-	}
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, errors.Wrap(err, "Failed to do http request")
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		var errorMsg Error
-		if err := json.NewDecoder(resp.Body).Decode(&errorMsg); err != nil {
-			return nil, errors.Wrap(err, "Failed to decode json")
-		}
-		return nil, fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
-	}
-
-	var connectors []ConnectorName
-	if err := json.NewDecoder(resp.Body).Decode(&connectors); err != nil {
-		return nil, errors.Wrap(err, "Faild to decode json")
-	}
-
-	return connectors, nil
-}
-
 func ListConnectorsOpenApi(cfg *openapi.Configuration) ([]ConnectorName, error) {
 	client := openapi.NewAPIClient(cfg)
 	ctx := context.Background()
@@ -204,27 +101,6 @@ func ListConnectorsOpenApi(cfg *openapi.Configuration) ([]ConnectorName, error) 
 	}
 
 	return connectors, nil
-}
-
-func GetConnector(endpoint, name string) (*Connector, error) {
-	u, err := url.Parse(endpoint)
-	if err != nil {
-		return nil, errors.Wrap(err, "Failed to parse url")
-	}
-
-	u.Path = path.Join(u.Path, "connectors", name)
-	resp, err := http.Get(u.String())
-	if err != nil {
-		return nil, errors.Wrap(err, "Failed to do http request")
-	}
-	defer resp.Body.Close()
-
-	var connector Connector
-	if err := json.NewDecoder(resp.Body).Decode(&connector); err != nil {
-		return nil, errors.Wrap(err, "Failed to decode json")
-	}
-
-	return &connector, nil
 }
 
 func GetConnectorOpenApi(cfg *openapi.Configuration, name string) (*openapi.ConnectorInfo, error) {
@@ -238,27 +114,6 @@ func GetConnectorOpenApi(cfg *openapi.Configuration, name string) (*openapi.Conn
 	return connector, nil
 }
 
-func GetConnectorConfig(endpoint, name string) (*ConnectorConfig, error) {
-	u, err := url.Parse(endpoint)
-	if err != nil {
-		return nil, errors.Wrap(err, "Failed to parse url")
-	}
-
-	u.Path = path.Join(u.Path, "connectors", name, "config")
-	resp, err := http.Get(u.String())
-	if err != nil {
-		return nil, errors.Wrap(err, "Failed to do http request")
-	}
-	defer resp.Body.Close()
-
-	var config ConnectorConfig
-	if err := json.NewDecoder(resp.Body).Decode(&config); err != nil {
-		return nil, errors.Wrap(err, "Faild to decode json")
-	}
-
-	return &config, nil
-}
-
 func GetConnectorConfigOpenApi(cfg *openapi.Configuration, name string) (*ConnectorConfig, error) {
 	client := openapi.NewAPIClient(cfg)
 	ctx := context.Background()
@@ -270,26 +125,6 @@ func GetConnectorConfigOpenApi(cfg *openapi.Configuration, name string) (*Connec
 	return &config, nil
 }
 
-func GetConnectorStatus(endpoint, name string) (*ConnectorStatus, error) {
-	u, err := url.Parse(endpoint)
-	if err != nil {
-		return nil, errors.Wrap(err, "Failed to parse url")
-	}
-
-	u.Path = path.Join(u.Path, "connectors", name, "status")
-	resp, err := http.Get(u.String())
-	if err != nil {
-		return nil, errors.Wrap(err, "Failed to do http request")
-	}
-	defer resp.Body.Close()
-
-	var status ConnectorStatus
-	if err := json.NewDecoder(resp.Body).Decode(&status); err != nil {
-		return nil, errors.Wrap(err, "Failed to decode json")
-	}
-
-	return &status, nil
-}
 func GetConnectorStatusOpenApi(cfg *openapi.Configuration, name string) (*openapi.ConnectorStateInfo, error) {
 	client := openapi.NewAPIClient(cfg)
 	ctx := context.Background()
@@ -302,42 +137,11 @@ func GetConnectorStatusOpenApi(cfg *openapi.Configuration, name string) (*openap
 	return status, nil
 }
 
-func RestartConnector(endpoint, name string) error {
-	u, err := url.Parse(endpoint)
-	if err != nil {
-		return errors.Wrap(err, "Failed to parse url")
-	}
-
-	u.Path = path.Join(u.Path, "connectors", name, "restart")
-	req, err := http.NewRequest(http.MethodPost, u.String(), nil)
-	if err != nil {
-		return errors.Wrap(err, "Failed to create http request")
-	}
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return errors.Wrap(err, "Failed to do http request")
-	}
-	defer resp.Body.Close()
-
-	var r io.Reader = resp.Body
-	// r = io.TeeReader(resp.Body, os.Stderr)
-
-	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
-		var errorMsg Error
-		if err := json.NewDecoder(r).Decode(&errorMsg); err != nil {
-			return errors.Wrap(err, "Failed to decode json")
-		}
-		return fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
-	}
-
-	return nil
-}
-
-func RestartConnectorOpenApi(cfg *openapi.Configuration, name string) error {
+func RestartConnectorOpenApi(cfg *openapi.Configuration, name string, includeTasks, onlyFailed bool) error {
 	client := openapi.NewAPIClient(cfg)
 	ctx := context.Background()
 
-	resp, err := client.DefaultAPI.RestartConnector(ctx, name).IncludeTasks(false).OnlyFailed(false).Execute()
+	resp, err := client.DefaultAPI.RestartConnector(ctx, name).IncludeTasks(includeTasks).OnlyFailed(onlyFailed).Execute()
 	if err != nil {
 		return errors.Wrap(err, "Failed to do http request")
 	}
@@ -345,37 +149,6 @@ func RestartConnectorOpenApi(cfg *openapi.Configuration, name string) error {
 
 	// var r io.Reader = resp.Body
 	var r = io.TeeReader(resp.Body, os.Stderr)
-
-	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
-		var errorMsg Error
-		if err := json.NewDecoder(r).Decode(&errorMsg); err != nil {
-			return errors.Wrap(err, "Failed to decode json")
-		}
-		return fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
-	}
-
-	return nil
-}
-
-func PauseConnector(endpoint, name string) error {
-	u, err := url.Parse(endpoint)
-	if err != nil {
-		return errors.Wrap(err, "Failed to parse url")
-	}
-
-	u.Path = path.Join(u.Path, "connectors", name, "pause")
-	req, err := http.NewRequest(http.MethodPut, u.String(), nil)
-	if err != nil {
-		return errors.Wrap(err, "Failed to create http request")
-	}
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return errors.Wrap(err, "Failed to do http request")
-	}
-	defer resp.Body.Close()
-
-	var r io.Reader = resp.Body
-	//r = io.TeeReader(resp.Body, os.Stderr)
 
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
 		var errorMsg Error
@@ -412,37 +185,6 @@ func PauseConnectorOpenApi(cfg *openapi.Configuration, name string) error {
 	return nil
 }
 
-func ResumeConnector(endpoint, name string) error {
-	u, err := url.Parse(endpoint)
-	if err != nil {
-		return errors.Wrap(err, "Failed to parse url")
-	}
-
-	u.Path = path.Join(u.Path, "connectors", name, "resume")
-	req, err := http.NewRequest(http.MethodPut, u.String(), nil)
-	if err != nil {
-		return errors.Wrap(err, "Failed to create http request")
-	}
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return errors.Wrap(err, "Failed to do http request")
-	}
-	defer resp.Body.Close()
-
-	var r io.Reader = resp.Body
-	//r = io.TeeReader(resp.Body, os.Stderr)
-
-	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
-		var errorMsg Error
-		if err := json.NewDecoder(r).Decode(&errorMsg); err != nil {
-			return errors.Wrap(err, "Failed to decode json")
-		}
-		return fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
-	}
-
-	return nil
-}
-
 func ResumeConnectorOpenApi(cfg *openapi.Configuration, name string) error {
 	client := openapi.NewAPIClient(cfg)
 	ctx := context.Background()
@@ -459,35 +201,6 @@ func ResumeConnectorOpenApi(cfg *openapi.Configuration, name string) error {
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
 		var errorMsg Error
 		if err := json.NewDecoder(r).Decode(&errorMsg); err != nil {
-			return errors.Wrap(err, "Failed to decode json")
-		}
-		return fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
-	}
-
-	return nil
-}
-
-func DeleteConnector(endpoint, name string) error {
-	u, err := url.Parse(endpoint)
-	if err != nil {
-		return errors.Wrap(err, "Failed to parse url")
-	}
-	u.Path = path.Join(u.Path, "connectors", name)
-
-	req, err := http.NewRequest(http.MethodDelete, u.String(), nil)
-	if err != nil {
-		return errors.Wrap(err, "Failed to create http request")
-	}
-
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return errors.Wrap(err, "Failed to do http request")
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusNoContent {
-		var errorMsg Error
-		if err := json.NewDecoder(resp.Body).Decode(&errorMsg); err != nil {
 			return errors.Wrap(err, "Failed to decode json")
 		}
 		return fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
@@ -519,27 +232,6 @@ func DeleteConnectorOpenApi(cfg *openapi.Configuration, name string) error {
 	return nil
 }
 
-func ListTasks(endpoint, name string) ([]TaskInfo, error) {
-	u, err := url.Parse(endpoint)
-	if err != nil {
-		return nil, errors.Wrap(err, "Failed to parse url")
-	}
-
-	u.Path = path.Join(u.Path, "connectors", name, "tasks")
-	resp, err := http.Get(u.String())
-	if err != nil {
-		return nil, errors.Wrap(err, "Failed to do http request")
-	}
-	defer resp.Body.Close()
-
-	var tasks []TaskInfo
-	if err := json.NewDecoder(resp.Body).Decode(&tasks); err != nil {
-		return nil, errors.Wrap(err, "Failed to decode json")
-	}
-
-	return tasks, nil
-}
-
 func GetTaskConfigs(cfg *openapi.Configuration, name string) ([]openapi.TaskInfo, error) {
 	client := openapi.NewAPIClient(cfg)
 
@@ -550,36 +242,6 @@ func GetTaskConfigs(cfg *openapi.Configuration, name string) ([]openapi.TaskInfo
 	return tasks, nil
 }
 
-func GetTaskStatus(endpoint, name, id string) (*TaskState, error) {
-	u, err := url.Parse(endpoint)
-	if err != nil {
-		return nil, errors.Wrap(err, "Failed to parse url")
-	}
-
-	u.Path = path.Join(u.Path, "connectors", name, "tasks", id, "status")
-
-	resp, err := http.Get(u.String())
-	if err != nil {
-		return nil, errors.Wrap(err, "Failed to do http request")
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		var errorMsg Error
-		if err := json.NewDecoder(resp.Body).Decode(&errorMsg); err != nil {
-			return nil, errors.Wrap(err, "Failed to decode json")
-		}
-		return nil, fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
-	}
-
-	var task TaskState
-	if err := json.NewDecoder(resp.Body).Decode(&task); err != nil {
-		return nil, errors.Wrap(err, "Failed to decode json")
-	}
-
-	return &task, nil
-}
-
 func GetTaskStatusOpenApi(cfg *openapi.Configuration, connector string, taskID int32) (*openapi.TaskState, error) {
 	client := openapi.NewAPIClient(cfg)
 	state, _, err := client.DefaultAPI.GetTaskStatus(context.Background(), connector, taskID).Execute()
@@ -587,37 +249,6 @@ func GetTaskStatusOpenApi(cfg *openapi.Configuration, connector string, taskID i
 		return nil, errors.Wrap(err, "Failed to get task status")
 	}
 	return state, nil
-}
-
-func RestartTask(endpoint, name, id string) error {
-	u, err := url.Parse(endpoint)
-	if err != nil {
-		return errors.Wrap(err, "Failed to parse url")
-	}
-
-	u.Path = path.Join(u.Path, "connectors", name, "tasks", id, "restart")
-	req, err := http.NewRequest(http.MethodPost, u.String(), nil)
-	if err != nil {
-		return errors.Wrap(err, "Failed to create http request")
-	}
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return errors.Wrap(err, "Failed to do http request")
-	}
-	defer resp.Body.Close()
-
-	var r io.Reader = resp.Body
-	// r = io.TeeReader(resp.Body, os.Stderr)
-
-	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
-		var errorMsg Error
-		if err := json.NewDecoder(r).Decode(&errorMsg); err != nil {
-			return errors.Wrap(err, "Failed to decode json")
-		}
-		return fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
-	}
-
-	return nil
 }
 
 func RestartTaskOpenApi(cfg *openapi.Configuration, connector string, taskId int32) error {
@@ -640,27 +271,6 @@ func RestartTaskOpenApi(cfg *openapi.Configuration, connector string, taskId int
 	}
 
 	return nil
-}
-
-func ListTopics(endpoint, name string) ([]string, error) {
-	u, err := url.Parse(endpoint)
-	if err != nil {
-		return nil, errors.Wrap(err, "Failed to parse url")
-	}
-
-	u.Path = path.Join(u.Path, "connectors", name, "topics")
-	resp, err := http.Get(u.String())
-	if err != nil {
-		return nil, errors.Wrap(err, "Failed to do http request")
-	}
-	defer resp.Body.Close()
-
-	var taskTopics TaskTopics
-	if err := json.NewDecoder(resp.Body).Decode(&taskTopics); err != nil {
-		return nil, errors.Wrap(err, "Failed to decode json")
-	}
-
-	return taskTopics[name].Topics, nil
 }
 
 func ListTopicsOpenApi(cfg *openapi.Configuration, name string) (*map[string]openapi.ConnectorActiveTopicsValue, error) {

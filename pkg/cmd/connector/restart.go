@@ -26,8 +26,16 @@ func newRestartCmd() *cobra.Command {
 			}
 
 			connector := args[0]
+			includeTasks, err := cmd.Flags().GetBool("include-tasks")
+			if err != nil {
+				return err
+			}
+			onlyFailed, err := cmd.Flags().GetBool("only-failed")
+			if err != nil {
+				return err
+			}
 
-			if err := connect.RestartConnectorOpenApi(cfg, connector); err != nil {
+			if err := connect.RestartConnectorOpenApi(cfg, connector, includeTasks, onlyFailed); err != nil {
 				return err
 			}
 
@@ -36,5 +44,7 @@ func newRestartCmd() *cobra.Command {
 		},
 	}
 
+	cmd.Flags().Bool("include-tasks", false, "Restart task instances too")
+	cmd.Flags().Bool("only-failed", false, "Restart only FAILED instances")
 	return cmd
 }
