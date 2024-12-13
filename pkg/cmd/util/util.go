@@ -33,20 +33,12 @@ func AddEndpointHostFlag(cmd *cobra.Command) {
 	cmd.PersistentFlags().String("host", "localhost:8083", "Kafka connect REST endpoint")
 }
 
-func AddEndpointFlag(cmd *cobra.Command) {
-	cmd.PersistentFlags().StringP("endpoint", "e", "http://localhost:8083", "Kafka connect REST endpoint")
-}
-
 func GetEndpointScheme(cmd *cobra.Command) (string, error) {
 	return cmd.InheritedFlags().GetString("scheme")
 }
 
 func GetEndpointHost(cmd *cobra.Command) (string, error) {
 	return cmd.InheritedFlags().GetString("host")
-}
-
-func GetEndpoint(cmd *cobra.Command) (string, error) {
-	return cmd.InheritedFlags().GetString("endpoint")
 }
 
 func GetOpenApiClientConfig(cmd *cobra.Command) (*openapi.Configuration, error) {

@@ -11,7 +11,6 @@ func NewServerCmd() *cobra.Command {
 		Short: "Commands for kafka connect server",
 	}
 
-	util.AddEndpointFlag(cmd)
 	util.AddEndpointHostFlag(cmd)
 	util.AddEndpointSchemeFlag(cmd)
 	cmd.AddCommand(newServerInfoCmd())
