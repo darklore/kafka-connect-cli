@@ -21,14 +21,14 @@ func newDescribeCmd() *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			endpoint, err := util.GetEndpoint(cmd)
+			cfg, err := util.GetOpenApiClientConfig(cmd)
 			if err != nil {
 				return err
 			}
 
 			connectorName := args[0]
 
-			connector, err := connect.GetConnector(endpoint, connectorName)
+			connector, err := connect.GetConnectorOpenApi(cfg, connectorName)
 			if err != nil {
 				return err
 			}
