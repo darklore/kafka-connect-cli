@@ -9,6 +9,7 @@ docs/ConfigInfo.md
 docs/ConfigInfos.md
 docs/ConfigKeyInfo.md
 docs/ConfigValueInfo.md
+docs/ConnectorActiveTopicsValue.md
 docs/ConnectorInfo.md
 docs/ConnectorOffset.md
 docs/ConnectorOffsets.md
@@ -26,6 +27,7 @@ model_config_info.go
 model_config_infos.go
 model_config_key_info.go
 model_config_value_info.go
+model_connector_active_topics_value.go
 model_connector_info.go
 model_connector_offset.go
 model_connector_offsets.go

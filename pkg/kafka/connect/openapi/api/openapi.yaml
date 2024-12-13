@@ -562,7 +562,9 @@ paths:
       responses:
         default:
           content:
-            application/json: {}
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectorActiveTopics'
           description: default response
       summary: Get the list of topics actively used by the specified connector
   /connectors/{connector}/topics/reset:
@@ -903,6 +905,10 @@ components:
       additionalProperties:
         type: string
       type: object
+    ConnectorActiveTopics:
+      additionalProperties:
+        $ref: '#/components/schemas/ConnectorActiveTopics_value'
+      type: object
     CreateConnectorRequest:
       example:
         initial_state: RUNNING
@@ -986,4 +992,11 @@ components:
           type: string
         worker_id:
           type: string
+      type: object
+    ConnectorActiveTopics_value:
+      properties:
+        topics:
+          items:
+            type: string
+          type: array
       type: object

@@ -440,7 +440,7 @@ type ApiGetConnectorActiveTopicsRequest struct {
 	connector string
 }
 
-func (r ApiGetConnectorActiveTopicsRequest) Execute() (*http.Response, error) {
+func (r ApiGetConnectorActiveTopicsRequest) Execute() (*map[string]ConnectorActiveTopicsValue, *http.Response, error) {
 	return r.ApiService.GetConnectorActiveTopicsExecute(r)
 }
 
@@ -460,16 +460,18 @@ func (a *DefaultAPIService) GetConnectorActiveTopics(ctx context.Context, connec
 }
 
 // Execute executes the request
-func (a *DefaultAPIService) GetConnectorActiveTopicsExecute(r ApiGetConnectorActiveTopicsRequest) (*http.Response, error) {
+//  @return map[string]ConnectorActiveTopicsValue
+func (a *DefaultAPIService) GetConnectorActiveTopicsExecute(r ApiGetConnectorActiveTopicsRequest) (*map[string]ConnectorActiveTopicsValue, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodGet
 		localVarPostBody     interface{}
 		formFiles            []formFile
+		localVarReturnValue  *map[string]ConnectorActiveTopicsValue
 	)
 
 	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "DefaultAPIService.GetConnectorActiveTopics")
 	if err != nil {
-		return nil, &GenericOpenAPIError{error: err.Error()}
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
 
 	localVarPath := localBasePath + "/connectors/{connector}/topics"
@@ -498,19 +500,19 @@ func (a *DefaultAPIService) GetConnectorActiveTopicsExecute(r ApiGetConnectorAct
 	}
 	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
 	if err != nil {
-		return nil, err
+		return localVarReturnValue, nil, err
 	}
 
 	localVarHTTPResponse, err := a.client.callAPI(req)
 	if err != nil || localVarHTTPResponse == nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
 	localVarHTTPResponse.Body.Close()
 	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
 	if err != nil {
-		return localVarHTTPResponse, err
+		return localVarReturnValue, localVarHTTPResponse, err
 	}
 
 	if localVarHTTPResponse.StatusCode >= 300 {
@@ -518,10 +520,27 @@ func (a *DefaultAPIService) GetConnectorActiveTopicsExecute(r ApiGetConnectorAct
 			body:  localVarBody,
 			error: localVarHTTPResponse.Status,
 		}
-		return localVarHTTPResponse, newErr
+			var v map[string]ConnectorActiveTopicsValue
+			err = a.client.decode(&v, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+			if err != nil {
+				newErr.error = err.Error()
+				return localVarReturnValue, localVarHTTPResponse, newErr
+			}
+					newErr.error = formatErrorMessage(localVarHTTPResponse.Status, &v)
+					newErr.model = v
+		return localVarReturnValue, localVarHTTPResponse, newErr
 	}
 
-	return localVarHTTPResponse, nil
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
 }
 
 type ApiGetConnectorConfigRequest struct {

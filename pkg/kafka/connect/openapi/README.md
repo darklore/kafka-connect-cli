@@ -115,6 +115,7 @@ Class | Method | HTTP request | Description
  - [ConfigInfos](docs/ConfigInfos.md)
  - [ConfigKeyInfo](docs/ConfigKeyInfo.md)
  - [ConfigValueInfo](docs/ConfigValueInfo.md)
+ - [ConnectorActiveTopicsValue](docs/ConnectorActiveTopicsValue.md)
  - [ConnectorInfo](docs/ConnectorInfo.md)
  - [ConnectorOffset](docs/ConnectorOffset.md)
  - [ConnectorOffsets](docs/ConnectorOffsets.md)

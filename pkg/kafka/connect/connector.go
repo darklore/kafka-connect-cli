@@ -663,21 +663,11 @@ func ListTopics(endpoint, name string) ([]string, error) {
 	return taskTopics[name].Topics, nil
 }
 
-func ListTopicsOpenApi(cfg *openapi.Configuration, name string) ([]string, error) {
+func ListTopicsOpenApi(cfg *openapi.Configuration, name string) (*map[string]openapi.ConnectorActiveTopicsValue, error) {
 	client := openapi.NewAPIClient(cfg)
-	resp, err := client.DefaultAPI.GetConnectorActiveTopics(context.Background(), name).Execute()
+	topics, _, err := client.DefaultAPI.GetConnectorActiveTopics(context.Background(), name).Execute()
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to do http request")
 	}
-	defer resp.Body.Close()
-
-	// var r = resp.Body
-	var r = io.TeeReader(resp.Body, os.Stderr)
-
-	var taskTopics TaskTopics
-	if err := json.NewDecoder(r).Decode(&taskTopics); err != nil {
-		return nil, errors.Wrap(err, "Failed to decode json")
-	}
-
-	return taskTopics[name].Topics, nil
+	return topics, nil
 }

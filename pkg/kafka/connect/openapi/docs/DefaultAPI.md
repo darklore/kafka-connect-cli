@@ -304,7 +304,7 @@ No authorization required
 
 ## GetConnectorActiveTopics
 
-> GetConnectorActiveTopics(ctx, connector).Execute()
+> map[string]ConnectorActiveTopicsValue GetConnectorActiveTopics(ctx, connector).Execute()
 
 Get the list of topics actively used by the specified connector
 
@@ -325,11 +325,13 @@ func main() {
 
 	configuration := openapiclient.NewConfiguration()
 	apiClient := openapiclient.NewAPIClient(configuration)
-	r, err := apiClient.DefaultAPI.GetConnectorActiveTopics(context.Background(), connector).Execute()
+	resp, r, err := apiClient.DefaultAPI.GetConnectorActiveTopics(context.Background(), connector).Execute()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error when calling `DefaultAPI.GetConnectorActiveTopics``: %v\n", err)
 		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
 	}
+	// response from `GetConnectorActiveTopics`: map[string]ConnectorActiveTopicsValue
+	fmt.Fprintf(os.Stdout, "Response from `DefaultAPI.GetConnectorActiveTopics`: %v\n", resp)
 }
 ```
 
@@ -352,7 +354,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
- (empty response body)
+[**map[string]ConnectorActiveTopicsValue**](ConnectorActiveTopicsValue.md)
 
 ### Authorization
 
