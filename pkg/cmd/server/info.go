@@ -1,4 +1,4 @@
-package cmd
+package server
 
 import (
 	"encoding/json"
@@ -9,17 +9,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newWorkerCmd() *cobra.Command {
+func newServerInfoCmd() *cobra.Command {
 	var cmd = &cobra.Command{
-		Use:   "worker",
-		Short: "Get a connect worker information",
+		Use:   "info",
+		Short: "Get a connect server information",
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			endpoint, err := util.GetEndpoint(cmd)
+			cfg, err := util.GetOpenApiClientConfig(cmd)
 			if err != nil {
 				return err
 			}
 
-			worker, err := connect.GetWorker(endpoint)
+			worker, err := connect.GetServerInfo(cfg)
 			if err != nil {
 				return err
 			}
@@ -31,7 +31,5 @@ func newWorkerCmd() *cobra.Command {
 			return nil
 		},
 	}
-
-	util.AddEndpointFlag(cmd)
 	return cmd
 }

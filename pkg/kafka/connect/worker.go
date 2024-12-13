@@ -1,8 +1,11 @@
 package connect
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
+
+	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect/openapi"
 )
 
 type Worker struct {
@@ -29,4 +32,13 @@ func GetWorker(endpoint string) (*Worker, error) {
 	}
 
 	return &worker, nil
+}
+
+func GetServerInfo(cfg *openapi.Configuration) (*openapi.ServerInfo, error) {
+	client := openapi.NewAPIClient(cfg)
+	info, _, err := client.DefaultAPI.ServerInfo(context.Background()).Execute()
+	if err != nil {
+		return nil, err
+	}
+	return info, nil
 }
