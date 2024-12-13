@@ -9,16 +9,16 @@ Usage:
   kccli [command]
 
 Available Commands:
-  completion  generate the autocompletion script for the specified shell
+  completion  Generate the autocompletion script for the specified shell
   connector   Commands for connectors
   help        Help about any command
   plugins     Commands for connector plugin
+  server      Commands for kafka connect server
   version     Show version
-  worker      Get a connect worker information
 
 Flags:
-  -e, --endpoint string   Kafka connect REST endpoint (default "http://localhost:8083")
-  -h, --help              help for kccli
+  -h, --help      help for kccli
+  -v, --version   version for kccli
 
 Use "kccli [command] --help" for more information about a command.
 ```
