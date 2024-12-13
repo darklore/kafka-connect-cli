@@ -21,19 +21,19 @@ func NewTasksCmd() *cobra.Command {
 }
 
 func validateTaskArgs(cmd *cobra.Command, connector string) ([]string, cobra.ShellCompDirective) {
-	endpoint, err := util.GetEndpoint(cmd)
+	cfg, err := util.GetOpenApiClientConfig(cmd)
 	if err != nil {
 		return nil, cobra.ShellCompDirectiveError
 	}
 
-	tasks, err := connect.ListTasks(endpoint, connector)
+	tasks, err := connect.GetTaskConfigs(cfg, connector)
 	if err != nil {
 		return nil, cobra.ShellCompDirectiveNoFileComp
 	}
 
 	IDs := make([]string, 0, len(tasks))
 	for _, t := range tasks {
-		IDs = append(IDs, fmt.Sprintf("%d", t.ID.ID))
+		IDs = append(IDs, fmt.Sprintf("%d", *t.Id.Task))
 	}
 
 	return IDs, cobra.ShellCompDirectiveNoFileComp

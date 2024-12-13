@@ -12,7 +12,7 @@ func newResumeCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "resume [connector]",
 		Short: "Resume a paused connector",
-		Args:  cobra.ExactValidArgs(1),
+		Args:  cobra.MatchAll(cobra.ExactArgs(1)),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
 			if len(args) == 0 {
 				return util.ValidConnectorArgs(cmd)
@@ -20,14 +20,14 @@ func newResumeCmd() *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			endpoint, err := util.GetEndpoint(cmd)
+			cfg, err := util.GetOpenApiClientConfig(cmd)
 			if err != nil {
 				return err
 			}
 
 			connector := args[0]
 
-			if err := connect.ResumeConnector(endpoint, connector); err != nil {
+			if err := connect.ResumeConnectorOpenApi(cfg, connector); err != nil {
 				return err
 			}
 

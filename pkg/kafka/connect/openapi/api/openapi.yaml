@@ -1,0 +1,1002 @@
+openapi: 3.0.0
+info:
+  contact:
+    email: dev@kafka.apache.org
+  description: "This is the documentation of the [Apache Kafka](https://kafka.apache.org)\
+    \ Connect REST API."
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  title: Kafka Connect REST API
+  version: 3.9.0
+servers:
+- url: /
+paths:
+  /:
+    get:
+      operationId: serverInfo
+      responses:
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerInfo'
+          description: default response
+      summary: Get details about this Connect worker and the ID of the Kafka cluster
+        it is connected to
+  /admin/loggers:
+    get:
+      operationId: listLoggers
+      responses:
+        default:
+          content:
+            application/json: {}
+          description: default response
+      summary: List the current loggers that have their levels explicitly set and
+        their log levels
+  /admin/loggers/{logger}:
+    get:
+      operationId: getLogger
+      parameters:
+      - explode: false
+        in: path
+        name: logger
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        default:
+          content:
+            application/json: {}
+          description: default response
+      summary: Get the log level for the specified logger
+    put:
+      operationId: setLevel
+      parameters:
+      - explode: false
+        in: path
+        name: logger
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: "The scope for the logging modification (single-worker, cluster-wide,\
+          \ etc.)"
+        explode: true
+        in: query
+        name: scope
+        required: false
+        schema:
+          default: worker
+          type: string
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties:
+                type: string
+              type: object
+      responses:
+        default:
+          content:
+            application/json: {}
+          description: default response
+      summary: Set the log level for the specified logger
+  /connector-plugins:
+    get:
+      operationId: listConnectorPlugins
+      parameters:
+      - description: Whether to list only connectors instead of all plugins
+        explode: true
+        in: query
+        name: connectorsOnly
+        required: false
+        schema:
+          default: true
+          type: boolean
+        style: form
+      responses:
+        default:
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/PluginInfo'
+                type: array
+          description: default response
+      summary: List all connector plugins installed
+  /connector-plugins/{pluginName}/config:
+    get:
+      operationId: getConnectorConfigDef
+      parameters:
+      - explode: false
+        in: path
+        name: pluginName
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        default:
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/ConfigKeyInfo'
+                type: array
+          description: default response
+      summary: Get the configuration definition for the specified pluginName
+  /connector-plugins/{pluginName}/config/validate:
+    put:
+      operationId: validateConfigs
+      parameters:
+      - explode: false
+        in: path
+        name: pluginName
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties:
+                type: string
+              type: object
+      responses:
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigInfos'
+          description: default response
+      summary: Validate the provided configuration against the configuration definition
+        for the specified pluginName
+  /connectors:
+    get:
+      operationId: listConnectors
+      responses:
+        default:
+          content:
+            application/json:
+              schema:
+                items:
+                  type: string
+                type: array
+          description: default response
+      summary: List all active connectors
+    post:
+      operationId: createConnector
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateConnectorRequest'
+      responses:
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectorInfo'
+          description: default response
+      summary: Create a new connector
+  /connectors/{connector}:
+    delete:
+      operationId: destroyConnector
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        default:
+          content:
+            application/json: {}
+          description: default response
+      summary: Delete the specified connector
+    get:
+      operationId: getConnector
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectorInfo'
+          description: default response
+      summary: Get the details for the specified connector
+  /connectors/{connector}/config:
+    get:
+      operationId: getConnectorConfig
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        default:
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                type: object
+          description: default response
+      summary: Get the configuration for the specified connector
+    patch:
+      operationId: patchConnectorConfig
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties:
+                type: string
+              type: object
+      responses:
+        default:
+          content:
+            application/json: {}
+          description: default response
+    put:
+      operationId: putConnectorConfig
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutConnectorConfigRequest'
+      responses:
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectorInfo'
+          description: default response
+      summary: Create or reconfigure the specified connector
+  /connectors/{connector}/offsets:
+    delete:
+      operationId: resetConnectorOffsets
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        default:
+          content:
+            application/json: {}
+          description: default response
+      summary: Reset the offsets for the specified connector
+    get:
+      operationId: getOffsets
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectorOffsets'
+          description: default response
+      summary: Get the current offsets for the specified connector
+    patch:
+      operationId: alterConnectorOffsets
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConnectorOffsets'
+      responses:
+        default:
+          content:
+            application/json: {}
+          description: default response
+      summary: Alter the offsets for the specified connector
+  /connectors/{connector}/pause:
+    put:
+      description: This operation is idempotent and has no effects if the connector
+        is already paused
+      operationId: pauseConnector
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        default:
+          content:
+            application/json: {}
+          description: default response
+      summary: Pause the specified connector
+  /connectors/{connector}/restart:
+    post:
+      operationId: restartConnector
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: Whether to also restart tasks
+        explode: true
+        in: query
+        name: includeTasks
+        required: false
+        schema:
+          default: false
+          type: boolean
+        style: form
+      - description: Whether to only restart failed tasks/connectors
+        explode: true
+        in: query
+        name: onlyFailed
+        required: false
+        schema:
+          default: false
+          type: boolean
+        style: form
+      responses:
+        default:
+          content:
+            application/json: {}
+          description: default response
+      summary: Restart the specified connector
+  /connectors/{connector}/resume:
+    put:
+      description: This operation is idempotent and has no effects if the connector
+        is already running
+      operationId: resumeConnector
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        default:
+          content:
+            application/json: {}
+          description: default response
+      summary: Resume the specified connector
+  /connectors/{connector}/status:
+    get:
+      operationId: getConnectorStatus
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectorStateInfo'
+          description: default response
+      summary: Get the status for the specified connector
+  /connectors/{connector}/stop:
+    put:
+      description: This operation is idempotent and has no effects if the connector
+        is already stopped
+      operationId: stopConnector
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        default:
+          content:
+            application/json: {}
+          description: default response
+      summary: Stop the specified connector
+  /connectors/{connector}/tasks:
+    get:
+      operationId: getTaskConfigs
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        default:
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/TaskInfo'
+                type: array
+          description: default response
+      summary: List all tasks and their configurations for the specified connector
+  /connectors/{connector}/tasks-config:
+    get:
+      deprecated: true
+      operationId: getTasksConfig
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        default:
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  additionalProperties:
+                    type: string
+                  type: object
+                type: object
+          description: default response
+      summary: Get the configuration of all tasks for the specified connector
+  /connectors/{connector}/tasks/{task}/restart:
+    post:
+      operationId: restartTask
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      - explode: false
+        in: path
+        name: task
+        required: true
+        schema:
+          format: int32
+          type: integer
+        style: simple
+      responses:
+        default:
+          content:
+            application/json: {}
+          description: default response
+      summary: Restart the specified task for the specified connector
+  /connectors/{connector}/tasks/{task}/status:
+    get:
+      operationId: getTaskStatus
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      - explode: false
+        in: path
+        name: task
+        required: true
+        schema:
+          format: int32
+          type: integer
+        style: simple
+      responses:
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TaskState'
+          description: default response
+      summary: Get the state of the specified task for the specified connector
+  /connectors/{connector}/topics:
+    get:
+      operationId: getConnectorActiveTopics
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        default:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConnectorActiveTopics'
+          description: default response
+      summary: Get the list of topics actively used by the specified connector
+  /connectors/{connector}/topics/reset:
+    put:
+      operationId: resetConnectorActiveTopics
+      parameters:
+      - explode: false
+        in: path
+        name: connector
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        default:
+          content:
+            application/json: {}
+          description: default response
+      summary: Reset the list of topics actively used by the specified connector
+  /health:
+    get:
+      operationId: healthCheck
+      responses:
+        default:
+          content:
+            application/json: {}
+          description: default response
+      summary: Health check endpoint to verify worker readiness and liveness
+components:
+  schemas:
+    ConfigInfo:
+      example:
+        definition:
+          order_in_group: 6
+          importance: importance
+          documentation: documentation
+          name: name
+          width: width
+          default_value: default_value
+          dependents:
+          - dependents
+          - dependents
+          display_name: display_name
+          type: type
+          required: true
+          group: group
+          order: 0
+        value:
+          recommended_values:
+          - recommended_values
+          - recommended_values
+          visible: true
+          name: name
+          value: value
+          errors:
+          - errors
+          - errors
+      properties:
+        definition:
+          $ref: '#/components/schemas/ConfigKeyInfo'
+        value:
+          $ref: '#/components/schemas/ConfigValueInfo'
+      type: object
+    ConfigInfos:
+      example:
+        configs:
+        - definition:
+            order_in_group: 6
+            importance: importance
+            documentation: documentation
+            name: name
+            width: width
+            default_value: default_value
+            dependents:
+            - dependents
+            - dependents
+            display_name: display_name
+            type: type
+            required: true
+            group: group
+            order: 0
+          value:
+            recommended_values:
+            - recommended_values
+            - recommended_values
+            visible: true
+            name: name
+            value: value
+            errors:
+            - errors
+            - errors
+        - definition:
+            order_in_group: 6
+            importance: importance
+            documentation: documentation
+            name: name
+            width: width
+            default_value: default_value
+            dependents:
+            - dependents
+            - dependents
+            display_name: display_name
+            type: type
+            required: true
+            group: group
+            order: 0
+          value:
+            recommended_values:
+            - recommended_values
+            - recommended_values
+            visible: true
+            name: name
+            value: value
+            errors:
+            - errors
+            - errors
+        name: name
+        groups:
+        - groups
+        - groups
+        error_count: 0
+      properties:
+        configs:
+          items:
+            $ref: '#/components/schemas/ConfigInfo'
+          type: array
+        error_count:
+          format: int32
+          type: integer
+        groups:
+          items:
+            type: string
+          type: array
+        name:
+          type: string
+      type: object
+    ConfigKeyInfo:
+      example:
+        order_in_group: 6
+        importance: importance
+        documentation: documentation
+        name: name
+        width: width
+        default_value: default_value
+        dependents:
+        - dependents
+        - dependents
+        display_name: display_name
+        type: type
+        required: true
+        group: group
+        order: 0
+      properties:
+        default_value:
+          type: string
+        dependents:
+          items:
+            type: string
+          type: array
+        display_name:
+          type: string
+        documentation:
+          type: string
+        group:
+          type: string
+        importance:
+          type: string
+        name:
+          type: string
+        order:
+          format: int32
+          type: integer
+        order_in_group:
+          format: int32
+          type: integer
+          writeOnly: true
+        required:
+          type: boolean
+        type:
+          type: string
+        width:
+          type: string
+      type: object
+    ConfigValueInfo:
+      example:
+        recommended_values:
+        - recommended_values
+        - recommended_values
+        visible: true
+        name: name
+        value: value
+        errors:
+        - errors
+        - errors
+      properties:
+        errors:
+          items:
+            type: string
+          type: array
+        name:
+          type: string
+        recommended_values:
+          items:
+            type: string
+          type: array
+        value:
+          type: string
+        visible:
+          type: boolean
+      type: object
+    ConnectorInfo:
+      example:
+        name: name
+        type: source
+        config:
+          key: config
+        tasks:
+        - task: 0
+          connector: connector
+        - task: 0
+          connector: connector
+      properties:
+        config:
+          additionalProperties:
+            type: string
+          type: object
+        name:
+          type: string
+        tasks:
+          items:
+            $ref: '#/components/schemas/ConnectorTaskId'
+          type: array
+        type:
+          enum:
+          - source
+          - sink
+          - unknown
+          type: string
+      type: object
+    ConnectorOffset:
+      example:
+        partition:
+          key: "{}"
+        offset:
+          key: "{}"
+      properties:
+        offset:
+          additionalProperties:
+            type: object
+          type: object
+        partition:
+          additionalProperties:
+            type: object
+          type: object
+      type: object
+    ConnectorOffsets:
+      example:
+        offsets:
+        - partition:
+            key: "{}"
+          offset:
+            key: "{}"
+        - partition:
+            key: "{}"
+          offset:
+            key: "{}"
+      properties:
+        offsets:
+          items:
+            $ref: '#/components/schemas/ConnectorOffset'
+          type: array
+      type: object
+    ConnectorState:
+      example:
+        msg: msg
+        trace: trace
+        state: state
+        worker_id: worker_id
+      properties:
+        msg:
+          type: string
+          writeOnly: true
+        state:
+          type: string
+        trace:
+          type: string
+        worker_id:
+          type: string
+      type: object
+    ConnectorStateInfo:
+      example:
+        connector:
+          msg: msg
+          trace: trace
+          state: state
+          worker_id: worker_id
+        name: name
+        type: source
+        tasks:
+        - msg: msg
+          trace: trace
+          id: 0
+          state: state
+          worker_id: worker_id
+        - msg: msg
+          trace: trace
+          id: 0
+          state: state
+          worker_id: worker_id
+      properties:
+        connector:
+          $ref: '#/components/schemas/ConnectorState'
+        name:
+          type: string
+        tasks:
+          items:
+            $ref: '#/components/schemas/TaskState'
+          type: array
+        type:
+          enum:
+          - source
+          - sink
+          - unknown
+          type: string
+      type: object
+    ConnectorTaskId:
+      example:
+        task: 0
+        connector: connector
+      properties:
+        connector:
+          type: string
+        task:
+          format: int32
+          type: integer
+      type: object
+    ConnectorConfig:
+      additionalProperties:
+        type: string
+      type: object
+    ConnectorActiveTopics:
+      additionalProperties:
+        $ref: '#/components/schemas/ConnectorActiveTopics_value'
+      type: object
+    CreateConnectorRequest:
+      example:
+        initial_state: RUNNING
+        name: name
+        config:
+          key: config
+      properties:
+        config:
+          additionalProperties:
+            type: string
+          type: object
+        initial_state:
+          enum:
+          - RUNNING
+          - PAUSED
+          - STOPPED
+          type: string
+        name:
+          type: string
+      type: object
+    PutConnectorConfigRequest:
+      $ref: '#/components/schemas/ConnectorConfig'
+    PluginInfo:
+      example:
+        type: type
+        class: class
+        version: version
+      properties:
+        class:
+          type: string
+        type:
+          type: string
+        version:
+          type: string
+      type: object
+    ServerInfo:
+      example:
+        kafka_cluster_id: kafka_cluster_id
+        commit: commit
+        version: version
+      properties:
+        commit:
+          type: string
+        kafka_cluster_id:
+          type: string
+        version:
+          type: string
+      type: object
+    TaskInfo:
+      example:
+        id:
+          task: 0
+          connector: connector
+        config:
+          key: config
+      properties:
+        config:
+          additionalProperties:
+            type: string
+          type: object
+        id:
+          $ref: '#/components/schemas/ConnectorTaskId'
+      type: object
+    TaskState:
+      example:
+        msg: msg
+        trace: trace
+        id: 0
+        state: state
+        worker_id: worker_id
+      properties:
+        id:
+          format: int32
+          type: integer
+        msg:
+          type: string
+          writeOnly: true
+        state:
+          type: string
+        trace:
+          type: string
+        worker_id:
+          type: string
+      type: object
+    ConnectorActiveTopics_value:
+      properties:
+        topics:
+          items:
+            type: string
+          type: array
+      type: object

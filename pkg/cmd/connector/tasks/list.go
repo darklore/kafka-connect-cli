@@ -13,7 +13,7 @@ func newListCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "list [connector]",
 		Short: "List tasks in a connector",
-		Args:  cobra.ExactValidArgs(1),
+		Args:  cobra.MatchAll(cobra.ExactArgs(1)),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
 			if len(args) == 0 {
 				return util.ValidConnectorArgs(cmd)
@@ -21,14 +21,14 @@ func newListCmd() *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			endpoint, err := util.GetEndpoint(cmd)
+			cfg, err := util.GetOpenApiClientConfig(cmd)
 			if err != nil {
 				return err
 			}
 
 			connector := args[0]
 
-			tasks, err := connect.ListTasks(endpoint, connector)
+			tasks, err := connect.GetTaskConfigs(cfg, connector)
 			if err != nil {
 				return err
 			}

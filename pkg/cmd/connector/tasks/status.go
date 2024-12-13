@@ -3,6 +3,7 @@ package tasks
 import (
 	"encoding/json"
 	"os"
+	"strconv"
 
 	"github.com/darklore/kafka-connect-cli/pkg/cmd/util"
 	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
@@ -13,7 +14,7 @@ func newStatusCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "status [connector] [task id]",
 		Short: "Get a task status in a connector",
-		Args:  cobra.ExactValidArgs(2),
+		Args:  cobra.MatchAll(cobra.ExactArgs(2)),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
 			switch len(args) {
 			case 0:
@@ -26,15 +27,18 @@ func newStatusCmd() *cobra.Command {
 			}
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			endpoint, err := util.GetEndpoint(cmd)
+			cfg, err := util.GetOpenApiClientConfig(cmd)
 			if err != nil {
 				return err
 			}
 
 			connector := args[0]
-			taskID := args[1]
+			taskID, err := strconv.ParseInt(args[1], 10, 32)
+			if err != nil {
+				return err
+			}
 
-			tasks, err := connect.GetTaskStatus(endpoint, connector, taskID)
+			tasks, err := connect.GetTaskStatusOpenApi(cfg, connector, int32(taskID))
 			if err != nil {
 				return err
 			}

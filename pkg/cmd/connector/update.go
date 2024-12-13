@@ -13,7 +13,7 @@ func newUpdateCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "update [connector name] [connector config json]",
 		Short: "Update or create a connector",
-		Args:  cobra.ExactValidArgs(2),
+		Args:  cobra.MatchAll(cobra.ExactArgs(2)),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
 			switch len(args) {
 			case 0:
@@ -25,7 +25,7 @@ func newUpdateCmd() *cobra.Command {
 			}
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			endpoint, err := util.GetEndpoint(cmd)
+			cfg, err := util.GetOpenApiClientConfig(cmd)
 			if err != nil {
 				return err
 			}
@@ -39,7 +39,7 @@ func newUpdateCmd() *cobra.Command {
 			}
 			defer configFile.Close()
 
-			connector, err := connect.UpdateConnector(endpoint, connectorName, configFile)
+			connector, err := connect.UpdateConnectorOpenApi(cfg, connectorName, configFile)
 			if err != nil {
 				return err
 			}

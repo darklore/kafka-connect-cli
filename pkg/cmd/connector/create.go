@@ -13,7 +13,7 @@ func newCreateCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "create [connector config json]",
 		Short: "Create a new connector",
-		Args:  cobra.ExactValidArgs(1),
+		Args:  cobra.MatchAll(cobra.ExactArgs(1)),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			if len(args) == 0 {
 				return []string{"json"}, cobra.ShellCompDirectiveFilterFileExt
@@ -21,7 +21,7 @@ func newCreateCmd() *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			endpoint, err := util.GetEndpoint(cmd)
+			cfg, err := util.GetOpenApiClientConfig(cmd)
 			if err != nil {
 				return err
 			}
@@ -34,7 +34,7 @@ func newCreateCmd() *cobra.Command {
 			}
 			defer configFile.Close()
 
-			connector, err := connect.CreateConnector(endpoint, configFile)
+			connector, err := connect.CreateConnectorOpenApi(cfg, configFile)
 			if err != nil {
 				return err
 			}
