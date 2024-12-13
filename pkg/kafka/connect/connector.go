@@ -305,6 +305,30 @@ func RestartConnector(endpoint, name string) error {
 	return nil
 }
 
+func RestartConnectorOpenApi(cfg *openapi.Configuration, name string) error {
+	client := openapi.NewAPIClient(cfg)
+	ctx := context.Background()
+
+	resp, err := client.DefaultAPI.RestartConnector(ctx, name).IncludeTasks(false).OnlyFailed(false).Execute()
+	if err != nil {
+		return errors.Wrap(err, "Failed to do http request")
+	}
+	defer resp.Body.Close()
+
+	var r io.Reader = resp.Body
+	// r = io.TeeReader(resp.Body, os.Stderr)
+
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		var errorMsg Error
+		if err := json.NewDecoder(r).Decode(&errorMsg); err != nil {
+			return errors.Wrap(err, "Failed to decode json")
+		}
+		return fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
+	}
+
+	return nil
+}
+
 func PauseConnector(endpoint, name string) error {
 	u, err := url.Parse(endpoint)
 	if err != nil {
@@ -317,6 +341,30 @@ func PauseConnector(endpoint, name string) error {
 		return errors.Wrap(err, "Failed to create http request")
 	}
 	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return errors.Wrap(err, "Failed to do http request")
+	}
+	defer resp.Body.Close()
+
+	var r io.Reader = resp.Body
+	//r = io.TeeReader(resp.Body, os.Stderr)
+
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		var errorMsg Error
+		if err := json.NewDecoder(r).Decode(&errorMsg); err != nil {
+			return errors.Wrap(err, "Failed to decode json")
+		}
+		return fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
+	}
+
+	return nil
+}
+
+func PauseConnectorOpenApi(cfg *openapi.Configuration, name string) error {
+	client := openapi.NewAPIClient(cfg)
+	ctx := context.Background()
+
+	resp, err := client.DefaultAPI.PauseConnector(ctx, name).Execute()
 	if err != nil {
 		return errors.Wrap(err, "Failed to do http request")
 	}

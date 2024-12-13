@@ -12,7 +12,7 @@ func newRestartCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "restart [connector]",
 		Short: "Restart a connector",
-		Args:  cobra.ExactValidArgs(1),
+		Args:  cobra.MatchAll(cobra.ExactArgs(1)),
 		ValidArgsFunction: func(cmd *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
 			if len(args) == 0 {
 				return util.ValidConnectorArgs(cmd)
@@ -20,14 +20,14 @@ func newRestartCmd() *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			endpoint, err := util.GetEndpoint(cmd)
+			cfg, err := util.GetOpenApiClientConfig(cmd)
 			if err != nil {
 				return err
 			}
 
 			connector := args[0]
 
-			if err := connect.RestartConnector(endpoint, connector); err != nil {
+			if err := connect.RestartConnectorOpenApi(cfg, connector); err != nil {
 				return err
 			}
 

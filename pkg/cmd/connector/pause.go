@@ -21,14 +21,14 @@ func newPauseCmd() *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			endpoint, err := util.GetEndpoint(cmd)
+			cfg, err := util.GetOpenApiClientConfig(cmd)
 			if err != nil {
 				return err
 			}
 
 			connector := args[0]
 
-			if err := connect.PauseConnector(endpoint, connector); err != nil {
+			if err := connect.PauseConnectorOpenApi(cfg, connector); err != nil {
 				return err
 			}
 
