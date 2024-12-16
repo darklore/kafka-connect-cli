@@ -1,6 +1,7 @@
 package connector
 
 import (
+	"github.com/darklore/kafka-connect-cli/pkg/cmd/connector/offsets"
 	"github.com/darklore/kafka-connect-cli/pkg/cmd/connector/tasks"
 	"github.com/darklore/kafka-connect-cli/pkg/cmd/util"
 	"github.com/spf13/cobra"
@@ -25,9 +26,11 @@ func NewCmd() *cobra.Command {
 	cmd.AddCommand(newRestartCmd())
 	cmd.AddCommand(newResumeCmd())
 	cmd.AddCommand(newStatusCmd())
+	cmd.AddCommand(newStopCmd())
 	cmd.AddCommand(newTopicsCmd())
 	cmd.AddCommand(newUpdateCmd())
 
 	cmd.AddCommand(tasks.NewTasksCmd())
+	cmd.AddCommand(offsets.NewOffsetsCmd())
 	return cmd
 }

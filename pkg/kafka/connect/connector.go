@@ -209,6 +209,28 @@ func GetTaskStatusOpenApi(cfg *openapi.Configuration, connector string, taskID i
 	return state, nil
 }
 
+func StopConnector(cfg *openapi.Configuration, connector string) error {
+	client := openapi.NewAPIClient(cfg)
+	resp, err := client.DefaultAPI.StopConnector(context.Background(), connector).Execute()
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	// var r io.Reader = resp.Body
+	var r = io.TeeReader(resp.Body, os.Stderr)
+
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		var errorMsg Error
+		if err := json.NewDecoder(r).Decode(&errorMsg); err != nil {
+			return errors.Wrap(err, "Failed to decode json")
+		}
+		return fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
+	}
+
+	return nil
+}
+
 func RestartTaskOpenApi(cfg *openapi.Configuration, connector string, taskId int32) error {
 	client := openapi.NewAPIClient(cfg)
 	resp, err := client.DefaultAPI.RestartTask(context.Background(), connector, taskId).Execute()
@@ -238,4 +260,35 @@ func ListTopicsOpenApi(cfg *openapi.Configuration, name string) (*map[string]ope
 		return nil, errors.Wrap(err, "Failed to do http request")
 	}
 	return topics, nil
+}
+
+func GetOffsets(cfg *openapi.Configuration, connector string) (*openapi.ConnectorOffsets, error) {
+	client := openapi.NewAPIClient(cfg)
+	offsets, _, err := client.DefaultAPI.GetOffsets(context.Background(), connector).Execute()
+	if err != nil {
+		return nil, err
+	}
+	return offsets, nil
+}
+
+func ResetOffsets(cfg *openapi.Configuration, connector string) error {
+	client := openapi.NewAPIClient(cfg)
+	resp, err := client.DefaultAPI.ResetConnectorOffsets(context.Background(), connector).Execute()
+	if err != nil {
+		return errors.Wrap(err, "Failed to do http request")
+	}
+	defer resp.Body.Close()
+
+	// var r io.Reader = resp.Body
+	var r = io.TeeReader(resp.Body, os.Stderr)
+
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusMultipleChoices {
+		var errorMsg Error
+		if err := json.NewDecoder(r).Decode(&errorMsg); err != nil {
+			return errors.Wrap(err, "Failed to decode json")
+		}
+		return fmt.Errorf("%d: %s", errorMsg.Code, errorMsg.Message)
+	}
+
+	return nil
 }
