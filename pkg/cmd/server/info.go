@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/darklore/kafka-connect-cli/pkg/cmd/util"
-	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
 	"github.com/spf13/cobra"
 )
 
@@ -14,12 +13,12 @@ func newServerInfoCmd() *cobra.Command {
 		Use:   "info",
 		Short: "Get a connect server information",
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			cfg, err := util.GetOpenApiClientConfig(cmd)
+			client, err := util.GetConnectClient(cmd)
 			if err != nil {
 				return err
 			}
 
-			worker, err := connect.GetServerInfo(cfg)
+			worker, err := client.GetServerInfo()
 			if err != nil {
 				return err
 			}

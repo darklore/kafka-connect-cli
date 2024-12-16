@@ -6,10 +6,8 @@ import (
 	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect/openapi"
 )
 
-func ListConnectorPluginOpenApi(cfg *openapi.Configuration) ([]openapi.PluginInfo, error) {
-	client := openapi.NewAPIClient(cfg)
-	ctx := context.Background()
-	plugins, _, err := client.DefaultAPI.ListConnectorPlugins(ctx).Execute()
+func (c *Client) ListConnectorPlugin() ([]openapi.PluginInfo, error) {
+	plugins, _, err := c.openapi.DefaultAPI.ListConnectorPlugins(context.Background()).Execute()
 	if err != nil {
 		return nil, err
 	}

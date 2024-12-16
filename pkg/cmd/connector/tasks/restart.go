@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/darklore/kafka-connect-cli/pkg/cmd/util"
-	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
 	"github.com/spf13/cobra"
 )
 
@@ -26,7 +25,7 @@ func newRestartCmd() *cobra.Command {
 			}
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cfg, err := util.GetOpenApiClientConfig(cmd)
+			client, err := util.GetConnectClient(cmd)
 			if err != nil {
 				return err
 			}
@@ -37,7 +36,7 @@ func newRestartCmd() *cobra.Command {
 				return err
 			}
 
-			if err := connect.RestartTaskOpenApi(cfg, connector, int32(taskID)); err != nil {
+			if err := client.RestartTask(connector, int32(taskID)); err != nil {
 				return err
 			}
 			fmt.Println("Restart task")

@@ -12,20 +12,27 @@ import (
 	"github.com/pkg/errors"
 )
 
+type Client struct {
+	openapi *openapi.APIClient
+}
+
+func NewClient(cfg *openapi.Configuration) *Client {
+	return &Client{
+		openapi: openapi.NewAPIClient(cfg),
+	}
+}
+
 type ConnectorName = string
 
 type ConnectorConfig = map[string]string
 
-func CreateConnectorOpenApi(cfg *openapi.Configuration, configJson io.Reader) (*openapi.ConnectorInfo, error) {
-	client := openapi.NewAPIClient(cfg)
-	ctx := context.Background()
-
+func (c *Client) CreateConnector(configJson io.Reader) (*openapi.ConnectorInfo, error) {
 	var connectorReq openapi.CreateConnectorRequest
 	if err := json.NewDecoder(configJson).Decode(&connectorReq); err != nil {
 		return nil, errors.Wrap(err, "Failed decode json")
 	}
 
-	info, _, err := client.DefaultAPI.CreateConnector(ctx).CreateConnectorRequest(connectorReq).Execute()
+	info, _, err := c.openapi.DefaultAPI.CreateConnector(context.Background()).CreateConnectorRequest(connectorReq).Execute()
 	if err != nil {
 		return nil, err
 	}
@@ -33,15 +40,13 @@ func CreateConnectorOpenApi(cfg *openapi.Configuration, configJson io.Reader) (*
 	return info, err
 }
 
-func UpdateConnectorOpenApi(cfg *openapi.Configuration, name string, configJson io.Reader) (*openapi.ConnectorInfo, error) {
-	client := openapi.NewAPIClient(cfg)
-
+func (c *Client) UpdateConnector(name string, configJson io.Reader) (*openapi.ConnectorInfo, error) {
 	var connectorConfig ConnectorConfig
 	if err := json.NewDecoder(configJson).Decode(&connectorConfig); err != nil {
 		return nil, errors.Wrap(err, "Failed decode json")
 	}
 
-	info, _, err := client.DefaultAPI.PutConnectorConfig(context.Background(), name).Body(connectorConfig).Execute()
+	info, _, err := c.openapi.DefaultAPI.PutConnectorConfig(context.Background(), name).Body(connectorConfig).Execute()
 	if err != nil {
 		return nil, err
 	}
@@ -49,11 +54,10 @@ func UpdateConnectorOpenApi(cfg *openapi.Configuration, name string, configJson 
 	return info, err
 }
 
-func ListConnectorsOpenApi(cfg *openapi.Configuration) ([]ConnectorName, error) {
-	client := openapi.NewAPIClient(cfg)
+func (c *Client) ListConnectors() ([]ConnectorName, error) {
 	ctx := context.Background()
 
-	connectors, _, err := client.DefaultAPI.ListConnectors(ctx).Execute()
+	connectors, _, err := c.openapi.DefaultAPI.ListConnectors(ctx).Execute()
 	if err != nil {
 		return nil, err
 	}
@@ -61,33 +65,24 @@ func ListConnectorsOpenApi(cfg *openapi.Configuration) ([]ConnectorName, error) 
 	return connectors, nil
 }
 
-func GetConnectorOpenApi(cfg *openapi.Configuration, name string) (*openapi.ConnectorInfo, error) {
-	client := openapi.NewAPIClient(cfg)
-	ctx := context.Background()
-
-	connector, _, err := client.DefaultAPI.GetConnector(ctx, name).Execute()
+func (c *Client) GetConnector(name string) (*openapi.ConnectorInfo, error) {
+	connector, _, err := c.openapi.DefaultAPI.GetConnector(context.Background(), name).Execute()
 	if err != nil {
 		return nil, err
 	}
 	return connector, nil
 }
 
-func GetConnectorConfigOpenApi(cfg *openapi.Configuration, name string) (*ConnectorConfig, error) {
-	client := openapi.NewAPIClient(cfg)
-	ctx := context.Background()
-
-	config, _, err := client.DefaultAPI.GetConnectorConfig(ctx, name).Execute()
+func (c *Client) GetConnectorConfig(name string) (*ConnectorConfig, error) {
+	config, _, err := c.openapi.DefaultAPI.GetConnectorConfig(context.Background(), name).Execute()
 	if err != nil {
 		return nil, err
 	}
 	return &config, nil
 }
 
-func GetConnectorStatusOpenApi(cfg *openapi.Configuration, name string) (*openapi.ConnectorStateInfo, error) {
-	client := openapi.NewAPIClient(cfg)
-	ctx := context.Background()
-
-	status, _, err := client.DefaultAPI.GetConnectorStatus(ctx, name).Execute()
+func (c *Client) GetConnectorStatus(name string) (*openapi.ConnectorStateInfo, error) {
+	status, _, err := c.openapi.DefaultAPI.GetConnectorStatus(context.Background(), name).Execute()
 	if err != nil {
 		return nil, err
 	}
@@ -95,11 +90,8 @@ func GetConnectorStatusOpenApi(cfg *openapi.Configuration, name string) (*openap
 	return status, nil
 }
 
-func RestartConnectorOpenApi(cfg *openapi.Configuration, name string, includeTasks, onlyFailed bool) error {
-	client := openapi.NewAPIClient(cfg)
-	ctx := context.Background()
-
-	resp, err := client.DefaultAPI.RestartConnector(ctx, name).IncludeTasks(includeTasks).OnlyFailed(onlyFailed).Execute()
+func (c *Client) RestartConnector(name string, includeTasks, onlyFailed bool) error {
+	resp, err := c.openapi.DefaultAPI.RestartConnector(context.Background(), name).IncludeTasks(includeTasks).OnlyFailed(onlyFailed).Execute()
 	if err != nil {
 		return errors.Wrap(err, "Failed to do http request")
 	}
@@ -119,11 +111,8 @@ func RestartConnectorOpenApi(cfg *openapi.Configuration, name string, includeTas
 	return nil
 }
 
-func PauseConnectorOpenApi(cfg *openapi.Configuration, name string) error {
-	client := openapi.NewAPIClient(cfg)
-	ctx := context.Background()
-
-	resp, err := client.DefaultAPI.PauseConnector(ctx, name).Execute()
+func (c *Client) PauseConnector(name string) error {
+	resp, err := c.openapi.DefaultAPI.PauseConnector(context.Background(), name).Execute()
 	if err != nil {
 		return errors.Wrap(err, "Failed to do http request")
 	}
@@ -143,11 +132,8 @@ func PauseConnectorOpenApi(cfg *openapi.Configuration, name string) error {
 	return nil
 }
 
-func ResumeConnectorOpenApi(cfg *openapi.Configuration, name string) error {
-	client := openapi.NewAPIClient(cfg)
-	ctx := context.Background()
-
-	resp, err := client.DefaultAPI.ResumeConnector(ctx, name).Execute()
+func (c *Client) ResumeConnector(name string) error {
+	resp, err := c.openapi.DefaultAPI.ResumeConnector(context.Background(), name).Execute()
 	if err != nil {
 		return errors.Wrap(err, "Failed to do http request")
 	}
@@ -167,11 +153,8 @@ func ResumeConnectorOpenApi(cfg *openapi.Configuration, name string) error {
 	return nil
 }
 
-func DeleteConnectorOpenApi(cfg *openapi.Configuration, name string) error {
-	client := openapi.NewAPIClient(cfg)
-	ctx := context.Background()
-
-	resp, err := client.DefaultAPI.DestroyConnector(ctx, name).Execute()
+func (c *Client) DeleteConnector(name string) error {
+	resp, err := c.openapi.DefaultAPI.DestroyConnector(context.Background(), name).Execute()
 	if err != nil {
 		return err
 	}
@@ -190,28 +173,24 @@ func DeleteConnectorOpenApi(cfg *openapi.Configuration, name string) error {
 	return nil
 }
 
-func GetTaskConfigs(cfg *openapi.Configuration, name string) ([]openapi.TaskInfo, error) {
-	client := openapi.NewAPIClient(cfg)
-
-	tasks, _, err := client.DefaultAPI.GetTaskConfigs(context.Background(), name).Execute()
+func (c *Client) GetTaskConfigs(name string) ([]openapi.TaskInfo, error) {
+	tasks, _, err := c.openapi.DefaultAPI.GetTaskConfigs(context.Background(), name).Execute()
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to get task configs")
 	}
 	return tasks, nil
 }
 
-func GetTaskStatusOpenApi(cfg *openapi.Configuration, connector string, taskID int32) (*openapi.TaskState, error) {
-	client := openapi.NewAPIClient(cfg)
-	state, _, err := client.DefaultAPI.GetTaskStatus(context.Background(), connector, taskID).Execute()
+func (c *Client) GetTaskStatus(connector string, taskID int32) (*openapi.TaskState, error) {
+	state, _, err := c.openapi.DefaultAPI.GetTaskStatus(context.Background(), connector, taskID).Execute()
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to get task status")
 	}
 	return state, nil
 }
 
-func StopConnector(cfg *openapi.Configuration, connector string) error {
-	client := openapi.NewAPIClient(cfg)
-	resp, err := client.DefaultAPI.StopConnector(context.Background(), connector).Execute()
+func (c *Client) StopConnector(connector string) error {
+	resp, err := c.openapi.DefaultAPI.StopConnector(context.Background(), connector).Execute()
 	if err != nil {
 		return err
 	}
@@ -231,9 +210,8 @@ func StopConnector(cfg *openapi.Configuration, connector string) error {
 	return nil
 }
 
-func RestartTaskOpenApi(cfg *openapi.Configuration, connector string, taskId int32) error {
-	client := openapi.NewAPIClient(cfg)
-	resp, err := client.DefaultAPI.RestartTask(context.Background(), connector, taskId).Execute()
+func (c *Client) RestartTask(connector string, taskId int32) error {
+	resp, err := c.openapi.DefaultAPI.RestartTask(context.Background(), connector, taskId).Execute()
 	if err != nil {
 		return errors.Wrap(err, "Failed to do http request")
 	}
@@ -253,27 +231,24 @@ func RestartTaskOpenApi(cfg *openapi.Configuration, connector string, taskId int
 	return nil
 }
 
-func ListTopicsOpenApi(cfg *openapi.Configuration, name string) (*map[string]openapi.ConnectorActiveTopicsValue, error) {
-	client := openapi.NewAPIClient(cfg)
-	topics, _, err := client.DefaultAPI.GetConnectorActiveTopics(context.Background(), name).Execute()
+func (c *Client) ListTopics(name string) (*map[string]openapi.ConnectorActiveTopicsValue, error) {
+	topics, _, err := c.openapi.DefaultAPI.GetConnectorActiveTopics(context.Background(), name).Execute()
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to do http request")
 	}
 	return topics, nil
 }
 
-func GetOffsets(cfg *openapi.Configuration, connector string) (*openapi.ConnectorOffsets, error) {
-	client := openapi.NewAPIClient(cfg)
-	offsets, _, err := client.DefaultAPI.GetOffsets(context.Background(), connector).Execute()
+func (c *Client) GetOffsets(connector string) (*openapi.ConnectorOffsets, error) {
+	offsets, _, err := c.openapi.DefaultAPI.GetOffsets(context.Background(), connector).Execute()
 	if err != nil {
 		return nil, err
 	}
 	return offsets, nil
 }
 
-func ResetOffsets(cfg *openapi.Configuration, connector string) error {
-	client := openapi.NewAPIClient(cfg)
-	resp, err := client.DefaultAPI.ResetConnectorOffsets(context.Background(), connector).Execute()
+func (c *Client) ResetOffsets(connector string) error {
+	resp, err := c.openapi.DefaultAPI.ResetConnectorOffsets(context.Background(), connector).Execute()
 	if err != nil {
 		return errors.Wrap(err, "Failed to do http request")
 	}

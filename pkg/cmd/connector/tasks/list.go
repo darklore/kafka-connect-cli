@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/darklore/kafka-connect-cli/pkg/cmd/util"
-	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
 	"github.com/spf13/cobra"
 )
 
@@ -21,14 +20,14 @@ func newListCmd() *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cfg, err := util.GetOpenApiClientConfig(cmd)
+			client, err := util.GetConnectClient(cmd)
 			if err != nil {
 				return err
 			}
 
 			connector := args[0]
 
-			tasks, err := connect.GetTaskConfigs(cfg, connector)
+			tasks, err := client.GetTaskConfigs(connector)
 			if err != nil {
 				return err
 			}

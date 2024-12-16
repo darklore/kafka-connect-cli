@@ -6,7 +6,6 @@ import (
 	"strconv"
 
 	"github.com/darklore/kafka-connect-cli/pkg/cmd/util"
-	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
 	"github.com/spf13/cobra"
 )
 
@@ -27,7 +26,7 @@ func newStatusCmd() *cobra.Command {
 			}
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cfg, err := util.GetOpenApiClientConfig(cmd)
+			client, err := util.GetConnectClient(cmd)
 			if err != nil {
 				return err
 			}
@@ -38,7 +37,7 @@ func newStatusCmd() *cobra.Command {
 				return err
 			}
 
-			tasks, err := connect.GetTaskStatusOpenApi(cfg, connector, int32(taskID))
+			tasks, err := client.GetTaskStatus(connector, int32(taskID))
 			if err != nil {
 				return err
 			}

@@ -10,13 +10,13 @@ import (
 )
 
 func ValidConnectorArgs(cmd *cobra.Command) ([]string, cobra.ShellCompDirective) {
-	cfg, err := GetOpenApiClientConfig(cmd)
+	client, err := GetConnectClient(cmd)
 	if err != nil {
 		log.Printf("%+v", errors.Wrap(err, ""))
 		return []string{}, cobra.ShellCompDirectiveError
 	}
 
-	connectors, err := connect.ListConnectorsOpenApi(cfg)
+	connectors, err := client.ListConnectors()
 	if err != nil {
 		log.Println(err)
 		return []string{}, cobra.ShellCompDirectiveError
@@ -54,6 +54,22 @@ func GetOpenApiClientConfig(cmd *cobra.Command) (*openapi.Configuration, error) 
 	cfg.Host = host
 	cfg.Scheme = scheme
 	return cfg, nil
+}
+
+func GetConnectClient(cmd *cobra.Command) (*connect.Client, error) {
+	scheme, err := cmd.InheritedFlags().GetString("scheme")
+	if err != nil {
+		return nil, err
+	}
+	host, err := cmd.InheritedFlags().GetString("host")
+	if err != nil {
+		return nil, err
+	}
+	cfg := openapi.NewConfiguration()
+	cfg.Host = host
+	cfg.Scheme = scheme
+	client := connect.NewClient(cfg)
+	return client, nil
 }
 
 func AddOutputFormatFlag(cmd *cobra.Command) {

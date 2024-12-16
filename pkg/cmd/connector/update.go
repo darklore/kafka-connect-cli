@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/darklore/kafka-connect-cli/pkg/cmd/util"
-	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
 	"github.com/spf13/cobra"
 )
 
@@ -25,7 +24,8 @@ func newUpdateCmd() *cobra.Command {
 			}
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cfg, err := util.GetOpenApiClientConfig(cmd)
+			client, err := util.GetConnectClient(cmd)
+
 			if err != nil {
 				return err
 			}
@@ -39,7 +39,7 @@ func newUpdateCmd() *cobra.Command {
 			}
 			defer configFile.Close()
 
-			connector, err := connect.UpdateConnectorOpenApi(cfg, connectorName, configFile)
+			connector, err := client.UpdateConnector(connectorName, configFile)
 			if err != nil {
 				return err
 			}

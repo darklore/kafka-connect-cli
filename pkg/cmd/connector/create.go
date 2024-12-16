@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/darklore/kafka-connect-cli/pkg/cmd/util"
-	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
 	"github.com/spf13/cobra"
 )
 
@@ -21,7 +20,7 @@ func newCreateCmd() *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cfg, err := util.GetOpenApiClientConfig(cmd)
+			client, err := util.GetConnectClient(cmd)
 			if err != nil {
 				return err
 			}
@@ -34,7 +33,7 @@ func newCreateCmd() *cobra.Command {
 			}
 			defer configFile.Close()
 
-			connector, err := connect.CreateConnectorOpenApi(cfg, configFile)
+			connector, err := client.CreateConnector(configFile)
 			if err != nil {
 				return err
 			}

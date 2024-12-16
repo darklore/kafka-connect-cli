@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/darklore/kafka-connect-cli/pkg/cmd/util"
-	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
 	"github.com/spf13/cobra"
 )
 
@@ -14,13 +13,12 @@ func newConnectorPluginListCmd() *cobra.Command {
 		Use:   "list",
 		Short: "List connector plugins",
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			// endpoint, err := util.GetEndpoint(cmd)
-			cfg, err := util.GetOpenApiClientConfig(cmd)
+			client, err := util.GetConnectClient(cmd)
 			if err != nil {
 				return err
 			}
 
-			plugins, err := connect.ListConnectorPluginOpenApi(cfg)
+			plugins, err := client.ListConnectorPlugin()
 			if err != nil {
 				return err
 			}

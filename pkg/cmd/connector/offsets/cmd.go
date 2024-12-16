@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/darklore/kafka-connect-cli/pkg/cmd/util"
-	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
 	"github.com/spf13/cobra"
 )
 
@@ -32,14 +31,14 @@ func newGetOffsetsCmd() *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cfg, err := util.GetOpenApiClientConfig(cmd)
+			client, err := util.GetConnectClient(cmd)
 			if err != nil {
 				return err
 			}
 
 			connector := args[0]
 
-			offsets, err := connect.GetOffsets(cfg, connector)
+			offsets, err := client.GetOffsets(connector)
 			if err != nil {
 				return err
 			}
@@ -64,14 +63,14 @@ func newResetOffsetCmd() *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cfg, err := util.GetOpenApiClientConfig(cmd)
+			client, err := util.GetConnectClient(cmd)
 			if err != nil {
 				return err
 			}
 
 			connector := args[0]
 
-			if err := connect.ResetOffsets(cfg, connector); err != nil {
+			if err := client.ResetOffsets(connector); err != nil {
 				return err
 			}
 

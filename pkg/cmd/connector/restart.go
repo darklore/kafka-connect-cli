@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/darklore/kafka-connect-cli/pkg/cmd/util"
-	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
 	"github.com/spf13/cobra"
 )
 
@@ -20,7 +19,7 @@ func newRestartCmd() *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			cfg, err := util.GetOpenApiClientConfig(cmd)
+			client, err := util.GetConnectClient(cmd)
 			if err != nil {
 				return err
 			}
@@ -35,7 +34,7 @@ func newRestartCmd() *cobra.Command {
 				return err
 			}
 
-			if err := connect.RestartConnectorOpenApi(cfg, connector, includeTasks, onlyFailed); err != nil {
+			if err := client.RestartConnector(connector, includeTasks, onlyFailed); err != nil {
 				return err
 			}
 

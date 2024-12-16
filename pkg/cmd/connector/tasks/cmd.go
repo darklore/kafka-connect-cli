@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/darklore/kafka-connect-cli/pkg/cmd/util"
-	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
 	"github.com/spf13/cobra"
 )
 
@@ -21,12 +20,12 @@ func NewTasksCmd() *cobra.Command {
 }
 
 func validateTaskArgs(cmd *cobra.Command, connector string) ([]string, cobra.ShellCompDirective) {
-	cfg, err := util.GetOpenApiClientConfig(cmd)
+	client, err := util.GetConnectClient(cmd)
 	if err != nil {
 		return nil, cobra.ShellCompDirectiveError
 	}
 
-	tasks, err := connect.GetTaskConfigs(cfg, connector)
+	tasks, err := client.GetTaskConfigs(connector)
 	if err != nil {
 		return nil, cobra.ShellCompDirectiveNoFileComp
 	}
