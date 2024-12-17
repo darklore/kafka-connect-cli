@@ -12,16 +12,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-type Client struct {
-	openapi *openapi.APIClient
-}
-
-func NewClient(cfg *openapi.Configuration) *Client {
-	return &Client{
-		openapi: openapi.NewAPIClient(cfg),
-	}
-}
-
 type ConnectorName = string
 
 type ConnectorConfig = map[string]string
