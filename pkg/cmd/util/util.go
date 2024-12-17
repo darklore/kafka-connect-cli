@@ -33,29 +33,6 @@ func AddEndpointHostFlag(cmd *cobra.Command) {
 	cmd.PersistentFlags().String("host", "localhost:8083", "Kafka connect REST endpoint")
 }
 
-func GetEndpointScheme(cmd *cobra.Command) (string, error) {
-	return cmd.InheritedFlags().GetString("scheme")
-}
-
-func GetEndpointHost(cmd *cobra.Command) (string, error) {
-	return cmd.InheritedFlags().GetString("host")
-}
-
-func GetOpenApiClientConfig(cmd *cobra.Command) (*openapi.Configuration, error) {
-	scheme, err := cmd.InheritedFlags().GetString("scheme")
-	if err != nil {
-		return nil, err
-	}
-	host, err := cmd.InheritedFlags().GetString("host")
-	if err != nil {
-		return nil, err
-	}
-	cfg := openapi.NewConfiguration()
-	cfg.Host = host
-	cfg.Scheme = scheme
-	return cfg, nil
-}
-
 func GetConnectClient(cmd *cobra.Command) (*connect.Client, error) {
 	scheme, err := cmd.InheritedFlags().GetString("scheme")
 	if err != nil {
