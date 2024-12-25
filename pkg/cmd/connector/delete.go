@@ -21,13 +21,13 @@ func newDeleteCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, err := util.GetConnectClient(cmd)
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to get connect client: %w", err)
 			}
 
 			connector := args[0]
 
 			if err := client.DeleteConnector(connector); err != nil {
-				return err
+				return fmt.Errorf("failed to delete connector: %w", err)
 			}
 
 			fmt.Println("Deleted.")

@@ -21,13 +21,13 @@ func newResumeCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, err := util.GetConnectClient(cmd)
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to get connect client: %w", err)
 			}
 
 			connector := args[0]
 
 			if err := client.ResumeConnector(connector); err != nil {
-				return err
+				return fmt.Errorf("failed to resume connector: %w", err)
 			}
 
 			fmt.Println("resume called")

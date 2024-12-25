@@ -2,6 +2,7 @@ package connector
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 
 	"github.com/darklore/kafka-connect-cli/pkg/cmd/util"
@@ -22,18 +23,18 @@ func newStatusCmd() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client, err := util.GetConnectClient(cmd)
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to get connect client: %w", err)
 			}
 
 			connector := args[0]
 
 			status, err := client.GetConnectorStatus(connector)
 			if err != nil {
-				return err
+				return fmt.Errorf("failed to get connector status: %w", err)
 			}
 
 			if err := json.NewEncoder(os.Stdout).Encode(status); err != nil {
-				return err
+				return fmt.Errorf("failed to encode status to JSON: %w", err)
 			}
 
 			return nil
