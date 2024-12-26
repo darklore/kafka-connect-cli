@@ -1,7 +1,9 @@
 package util
 
 import (
+	"fmt"
 	"log"
+	"log/slog"
 
 	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
 	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect/openapi"
@@ -12,12 +14,13 @@ import (
 func ValidConnectorArgs(cmd *cobra.Command) ([]string, cobra.ShellCompDirective) {
 	client, err := GetConnectClient(cmd)
 	if err != nil {
-		log.Printf("%+v", errors.Wrap(err, ""))
+		slog.Error(fmt.Sprintf("%+v", errors.Wrap(err, "")))
 		return []string{}, cobra.ShellCompDirectiveError
 	}
 
 	connectors, err := client.ListConnectors()
 	if err != nil {
+		slog.Error(err)
 		log.Println(err)
 		return []string{}, cobra.ShellCompDirectiveError
 	}

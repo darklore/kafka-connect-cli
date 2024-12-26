@@ -1,7 +1,8 @@
 package main
 
 import (
-	"log"
+	"fmt"
+	"log/slog"
 	"os"
 	"runtime/debug"
 
@@ -13,18 +14,17 @@ var (
 )
 
 func main() {
-
 	if version == "" {
 		buildInfo, ok := debug.ReadBuildInfo()
 		if !ok {
-			log.Fatal("Failed to get build info.")
+			slog.Error("Failed to get build info.")
 		}
 		version = buildInfo.Main.Version
 	}
 
 	c := cmd.NewCmd(version)
 	if err := c.Execute(); err != nil {
-		log.Printf("%+v", err)
+		slog.Error(fmt.Sprintf("%+v", err))
 		os.Exit(1)
 	}
 }
