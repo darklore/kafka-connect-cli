@@ -1,0 +1,6 @@
+version: "3"
+
+tasks:
+  generate-openapi:
+    cmds:
+      - openapi-generator generate -i openapi/connect_rest.yaml --git-host github.com --git-user-id darklore --git-repo-id kafka-connect-cli --package-name openapi --generator-name go --additional-properties withGoMod=false -o pkg/kafka/connect/openapi
