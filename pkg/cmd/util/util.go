@@ -3,6 +3,7 @@ package util
 import (
 	"log"
 
+	"github.com/darklore/kafka-connect-cli/internal/ogen"
 	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect"
 	"github.com/darklore/kafka-connect-cli/pkg/kafka/connect/openapi"
 	"github.com/pkg/errors"
@@ -25,12 +26,8 @@ func ValidConnectorArgs(cmd *cobra.Command) ([]string, cobra.ShellCompDirective)
 	return connectors, cobra.ShellCompDirectiveNoFileComp
 }
 
-func AddEndpointSchemeFlag(cmd *cobra.Command) {
-	cmd.PersistentFlags().String("scheme", "http", "scheme of the endpoint url")
-}
-
 func AddEndpointHostFlag(cmd *cobra.Command) {
-	cmd.PersistentFlags().String("host", "localhost:8083", "Kafka connect REST endpoint")
+	cmd.PersistentFlags().String("host", "http://localhost:8083", "Kafka connect REST endpoint")
 }
 
 func GetConnectClient(cmd *cobra.Command) (*connect.Client, error) {
@@ -47,6 +44,15 @@ func GetConnectClient(cmd *cobra.Command) (*connect.Client, error) {
 	cfg.Scheme = scheme
 	client := connect.NewClient(cfg)
 	return client, nil
+}
+
+func GetConnectClient2(cmd *cobra.Command) (*ogen.Client, error) {
+	host, err := cmd.InheritedFlags().GetString("host")
+	if err != nil {
+		return nil, err
+	}
+	client, err := ogen.NewClient(host)
+	return client, err
 }
 
 func AddOutputFormatFlag(cmd *cobra.Command) {

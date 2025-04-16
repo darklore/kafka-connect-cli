@@ -12,7 +12,6 @@ func NewServerCmd() *cobra.Command {
 	}
 
 	util.AddEndpointHostFlag(cmd)
-	util.AddEndpointSchemeFlag(cmd)
 	cmd.AddCommand(newServerInfoCmd())
 	return cmd
 }

@@ -1,10 +1,12 @@
 package connector
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
 
+	"github.com/darklore/kafka-connect-cli/internal/ogen"
 	"github.com/darklore/kafka-connect-cli/pkg/cmd/util"
 
 	"github.com/spf13/cobra"
@@ -22,22 +24,19 @@ func newConfigCmd() *cobra.Command {
 			return nil, cobra.ShellCompDirectiveNoFileComp
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			client, err := util.GetConnectClient(cmd)
+			client, err := util.GetConnectClient2(cmd)
 			if err != nil {
 				return fmt.Errorf("failed to get connect client: %w", err)
 			}
-
-			connector := args[0]
-
-			config, err := client.GetConnectorConfig(connector)
+			res, err := client.GetConnectorConfig(context.Background(), ogen.GetConnectorConfigParams{
+				Connector: args[0],
+			})
 			if err != nil {
-				return fmt.Errorf("failed to get connector config: %w", err)
+				return fmt.Errorf("failed to get connect client: %w", err)
 			}
-
-			if err := json.NewEncoder(os.Stdout).Encode(config); err != nil {
+			if err := json.NewEncoder(os.Stdout).Encode(res.Response); err != nil {
 				return fmt.Errorf("failed to encode config to JSON: %w", err)
 			}
-
 			return nil
 		},
 	}

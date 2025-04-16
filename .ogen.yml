@@ -1,0 +1,4 @@
+generator:
+  # functions to ignore
+  ignore_not_implemented:
+    - "empty schema"

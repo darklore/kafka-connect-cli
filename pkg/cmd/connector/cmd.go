@@ -13,7 +13,6 @@ func NewCmd() *cobra.Command {
 		Short: "Commands for connectors",
 	}
 
-	util.AddEndpointSchemeFlag(cmd)
 	util.AddEndpointHostFlag(cmd)
 
 	// add subcommands
