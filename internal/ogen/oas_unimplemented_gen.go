@@ -13,30 +13,12 @@ type UnimplementedHandler struct{}
 
 var _ Handler = UnimplementedHandler{}
 
-// CreateConnector implements createConnector operation.
-//
-// Create a new connector.
-//
-// POST /connectors
-func (UnimplementedHandler) CreateConnector(ctx context.Context, req OptCreateConnectorRequest) (r *ConnectorInfoStatusCode, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // GetConnector implements getConnector operation.
 //
 // Get the details for the specified connector.
 //
 // GET /connectors/{connector}
 func (UnimplementedHandler) GetConnector(ctx context.Context, params GetConnectorParams) (r *ConnectorInfoStatusCode, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// GetConnectorActiveTopics implements getConnectorActiveTopics operation.
-//
-// Get the list of topics actively used by the specified connector.
-//
-// GET /connectors/{connector}/topics
-func (UnimplementedHandler) GetConnectorActiveTopics(ctx context.Context, params GetConnectorActiveTopicsParams) (r *ConnectorActiveTopicsStatusCode, _ error) {
 	return r, ht.ErrNotImplemented
 }
 
@@ -94,41 +76,12 @@ func (UnimplementedHandler) GetTaskStatus(ctx context.Context, params GetTaskSta
 	return r, ht.ErrNotImplemented
 }
 
-// GetTasksConfig implements getTasksConfig operation.
-//
-// Get the configuration of all tasks for the specified connector.
-//
-// Deprecated: schema marks this operation as deprecated.
-//
-// GET /connectors/{connector}/tasks-config
-func (UnimplementedHandler) GetTasksConfig(ctx context.Context, params GetTasksConfigParams) (r *GetTasksConfigDefStatusCode, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
 // ListConnectorPlugins implements listConnectorPlugins operation.
 //
 // List all connector plugins installed.
 //
 // GET /connector-plugins
 func (UnimplementedHandler) ListConnectorPlugins(ctx context.Context, params ListConnectorPluginsParams) (r *ListConnectorPluginsDefStatusCode, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// ListConnectors implements listConnectors operation.
-//
-// List all active connectors.
-//
-// GET /connectors
-func (UnimplementedHandler) ListConnectors(ctx context.Context) (r *ListConnectorsDefStatusCode, _ error) {
-	return r, ht.ErrNotImplemented
-}
-
-// PutConnectorConfig implements putConnectorConfig operation.
-//
-// Create or reconfigure the specified connector.
-//
-// PUT /connectors/{connector}/config
-func (UnimplementedHandler) PutConnectorConfig(ctx context.Context, req OptConnectorConfig, params PutConnectorConfigParams) (r *ConnectorInfoStatusCode, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

@@ -169,22 +169,31 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 					}
 
-				case 's': // Prefix: "s"
+				case 's': // Prefix: "s/"
 
-					if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
+					if l := len("s/"); len(elem) >= l && elem[0:l] == "s/" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
+					// Param: "connector"
+					// Match until "/"
+					idx := strings.IndexByte(elem, '/')
+					if idx < 0 {
+						idx = len(elem)
+					}
+					args[0] = elem[:idx]
+					elem = elem[idx:]
+
 					if len(elem) == 0 {
 						switch r.Method {
 						case "GET":
-							s.handleListConnectorsRequest([0]string{}, elemIsEscaped, w, r)
-						case "POST":
-							s.handleCreateConnectorRequest([0]string{}, elemIsEscaped, w, r)
+							s.handleGetConnectorRequest([1]string{
+								args[0],
+							}, elemIsEscaped, w, r)
 						default:
-							s.notAllowed(w, r, "GET,POST")
+							s.notAllowed(w, r, "GET")
 						}
 
 						return
@@ -198,216 +207,121 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 							break
 						}
 
-						// Param: "connector"
-						// Match until "/"
-						idx := strings.IndexByte(elem, '/')
-						if idx < 0 {
-							idx = len(elem)
-						}
-						args[0] = elem[:idx]
-						elem = elem[idx:]
-
 						if len(elem) == 0 {
-							switch r.Method {
-							case "GET":
-								s.handleGetConnectorRequest([1]string{
-									args[0],
-								}, elemIsEscaped, w, r)
-							default:
-								s.notAllowed(w, r, "GET")
-							}
-
-							return
+							break
 						}
 						switch elem[0] {
-						case '/': // Prefix: "/"
+						case 'c': // Prefix: "config"
 
-							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+							if l := len("config"); len(elem) >= l && elem[0:l] == "config" {
 								elem = elem[l:]
 							} else {
 								break
 							}
 
 							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleGetConnectorConfigRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
+
+						case 'o': // Prefix: "offsets"
+
+							if l := len("offsets"); len(elem) >= l && elem[0:l] == "offsets" {
+								elem = elem[l:]
+							} else {
 								break
 							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleGetOffsetsRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
+
+						case 's': // Prefix: "status"
+
+							if l := len("status"); len(elem) >= l && elem[0:l] == "status" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch r.Method {
+								case "GET":
+									s.handleGetConnectorStatusRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
+
+						case 't': // Prefix: "tasks"
+
+							if l := len("tasks"); len(elem) >= l && elem[0:l] == "tasks" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch r.Method {
+								case "GET":
+									s.handleGetTaskConfigsRequest([1]string{
+										args[0],
+									}, elemIsEscaped, w, r)
+								default:
+									s.notAllowed(w, r, "GET")
+								}
+
+								return
+							}
 							switch elem[0] {
-							case 'c': // Prefix: "config"
+							case '/': // Prefix: "/"
 
-								if l := len("config"); len(elem) >= l && elem[0:l] == "config" {
+								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 									elem = elem[l:]
 								} else {
 									break
 								}
 
-								if len(elem) == 0 {
-									// Leaf node.
-									switch r.Method {
-									case "GET":
-										s.handleGetConnectorConfigRequest([1]string{
-											args[0],
-										}, elemIsEscaped, w, r)
-									case "PUT":
-										s.handlePutConnectorConfigRequest([1]string{
-											args[0],
-										}, elemIsEscaped, w, r)
-									default:
-										s.notAllowed(w, r, "GET,PUT")
-									}
-
-									return
+								// Param: "task"
+								// Match until "/"
+								idx := strings.IndexByte(elem, '/')
+								if idx < 0 {
+									idx = len(elem)
 								}
-
-							case 'o': // Prefix: "offsets"
-
-								if l := len("offsets"); len(elem) >= l && elem[0:l] == "offsets" {
-									elem = elem[l:]
-								} else {
-									break
-								}
-
-								if len(elem) == 0 {
-									// Leaf node.
-									switch r.Method {
-									case "GET":
-										s.handleGetOffsetsRequest([1]string{
-											args[0],
-										}, elemIsEscaped, w, r)
-									default:
-										s.notAllowed(w, r, "GET")
-									}
-
-									return
-								}
-
-							case 's': // Prefix: "status"
-
-								if l := len("status"); len(elem) >= l && elem[0:l] == "status" {
-									elem = elem[l:]
-								} else {
-									break
-								}
-
-								if len(elem) == 0 {
-									// Leaf node.
-									switch r.Method {
-									case "GET":
-										s.handleGetConnectorStatusRequest([1]string{
-											args[0],
-										}, elemIsEscaped, w, r)
-									default:
-										s.notAllowed(w, r, "GET")
-									}
-
-									return
-								}
-
-							case 't': // Prefix: "t"
-
-								if l := len("t"); len(elem) >= l && elem[0:l] == "t" {
-									elem = elem[l:]
-								} else {
-									break
-								}
+								args[1] = elem[:idx]
+								elem = elem[idx:]
 
 								if len(elem) == 0 {
 									break
 								}
 								switch elem[0] {
-								case 'a': // Prefix: "asks"
+								case '/': // Prefix: "/status"
 
-									if l := len("asks"); len(elem) >= l && elem[0:l] == "asks" {
-										elem = elem[l:]
-									} else {
-										break
-									}
-
-									if len(elem) == 0 {
-										switch r.Method {
-										case "GET":
-											s.handleGetTaskConfigsRequest([1]string{
-												args[0],
-											}, elemIsEscaped, w, r)
-										default:
-											s.notAllowed(w, r, "GET")
-										}
-
-										return
-									}
-									switch elem[0] {
-									case '-': // Prefix: "-config"
-
-										if l := len("-config"); len(elem) >= l && elem[0:l] == "-config" {
-											elem = elem[l:]
-										} else {
-											break
-										}
-
-										if len(elem) == 0 {
-											// Leaf node.
-											switch r.Method {
-											case "GET":
-												s.handleGetTasksConfigRequest([1]string{
-													args[0],
-												}, elemIsEscaped, w, r)
-											default:
-												s.notAllowed(w, r, "GET")
-											}
-
-											return
-										}
-
-									case '/': // Prefix: "/"
-
-										if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-											elem = elem[l:]
-										} else {
-											break
-										}
-
-										// Param: "task"
-										// Match until "/"
-										idx := strings.IndexByte(elem, '/')
-										if idx < 0 {
-											idx = len(elem)
-										}
-										args[1] = elem[:idx]
-										elem = elem[idx:]
-
-										if len(elem) == 0 {
-											break
-										}
-										switch elem[0] {
-										case '/': // Prefix: "/status"
-
-											if l := len("/status"); len(elem) >= l && elem[0:l] == "/status" {
-												elem = elem[l:]
-											} else {
-												break
-											}
-
-											if len(elem) == 0 {
-												// Leaf node.
-												switch r.Method {
-												case "GET":
-													s.handleGetTaskStatusRequest([2]string{
-														args[0],
-														args[1],
-													}, elemIsEscaped, w, r)
-												default:
-													s.notAllowed(w, r, "GET")
-												}
-
-												return
-											}
-
-										}
-
-									}
-
-								case 'o': // Prefix: "opics"
-
-									if l := len("opics"); len(elem) >= l && elem[0:l] == "opics" {
+									if l := len("/status"); len(elem) >= l && elem[0:l] == "/status" {
 										elem = elem[l:]
 									} else {
 										break
@@ -417,8 +331,9 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 										// Leaf node.
 										switch r.Method {
 										case "GET":
-											s.handleGetConnectorActiveTopicsRequest([1]string{
+											s.handleGetTaskStatusRequest([2]string{
 												args[0],
+												args[1],
 											}, elemIsEscaped, w, r)
 										default:
 											s.notAllowed(w, r, "GET")
@@ -651,31 +566,32 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 
 					}
 
-				case 's': // Prefix: "s"
+				case 's': // Prefix: "s/"
 
-					if l := len("s"); len(elem) >= l && elem[0:l] == "s" {
+					if l := len("s/"); len(elem) >= l && elem[0:l] == "s/" {
 						elem = elem[l:]
 					} else {
 						break
 					}
 
+					// Param: "connector"
+					// Match until "/"
+					idx := strings.IndexByte(elem, '/')
+					if idx < 0 {
+						idx = len(elem)
+					}
+					args[0] = elem[:idx]
+					elem = elem[idx:]
+
 					if len(elem) == 0 {
 						switch method {
 						case "GET":
-							r.name = ListConnectorsOperation
-							r.summary = "List all active connectors"
-							r.operationID = "listConnectors"
-							r.pathPattern = "/connectors"
+							r.name = GetConnectorOperation
+							r.summary = "Get the details for the specified connector"
+							r.operationID = "getConnector"
+							r.pathPattern = "/connectors/{connector}"
 							r.args = args
-							r.count = 0
-							return r, true
-						case "POST":
-							r.name = CreateConnectorOperation
-							r.summary = "Create a new connector"
-							r.operationID = "createConnector"
-							r.pathPattern = "/connectors"
-							r.args = args
-							r.count = 0
+							r.count = 1
 							return r, true
 						default:
 							return
@@ -690,233 +606,129 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 							break
 						}
 
-						// Param: "connector"
-						// Match until "/"
-						idx := strings.IndexByte(elem, '/')
-						if idx < 0 {
-							idx = len(elem)
-						}
-						args[0] = elem[:idx]
-						elem = elem[idx:]
-
 						if len(elem) == 0 {
-							switch method {
-							case "GET":
-								r.name = GetConnectorOperation
-								r.summary = "Get the details for the specified connector"
-								r.operationID = "getConnector"
-								r.pathPattern = "/connectors/{connector}"
-								r.args = args
-								r.count = 1
-								return r, true
-							default:
-								return
-							}
+							break
 						}
 						switch elem[0] {
-						case '/': // Prefix: "/"
+						case 'c': // Prefix: "config"
 
-							if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
+							if l := len("config"); len(elem) >= l && elem[0:l] == "config" {
 								elem = elem[l:]
 							} else {
 								break
 							}
 
 							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "GET":
+									r.name = GetConnectorConfigOperation
+									r.summary = "Get the configuration for the specified connector"
+									r.operationID = "getConnectorConfig"
+									r.pathPattern = "/connectors/{connector}/config"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+
+						case 'o': // Prefix: "offsets"
+
+							if l := len("offsets"); len(elem) >= l && elem[0:l] == "offsets" {
+								elem = elem[l:]
+							} else {
 								break
 							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "GET":
+									r.name = GetOffsetsOperation
+									r.summary = "Get the current offsets for the specified connector"
+									r.operationID = "getOffsets"
+									r.pathPattern = "/connectors/{connector}/offsets"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+
+						case 's': // Prefix: "status"
+
+							if l := len("status"); len(elem) >= l && elem[0:l] == "status" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								// Leaf node.
+								switch method {
+								case "GET":
+									r.name = GetConnectorStatusOperation
+									r.summary = "Get the status for the specified connector"
+									r.operationID = "getConnectorStatus"
+									r.pathPattern = "/connectors/{connector}/status"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
+
+						case 't': // Prefix: "tasks"
+
+							if l := len("tasks"); len(elem) >= l && elem[0:l] == "tasks" {
+								elem = elem[l:]
+							} else {
+								break
+							}
+
+							if len(elem) == 0 {
+								switch method {
+								case "GET":
+									r.name = GetTaskConfigsOperation
+									r.summary = "List all tasks and their configurations for the specified connector"
+									r.operationID = "getTaskConfigs"
+									r.pathPattern = "/connectors/{connector}/tasks"
+									r.args = args
+									r.count = 1
+									return r, true
+								default:
+									return
+								}
+							}
 							switch elem[0] {
-							case 'c': // Prefix: "config"
+							case '/': // Prefix: "/"
 
-								if l := len("config"); len(elem) >= l && elem[0:l] == "config" {
+								if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
 									elem = elem[l:]
 								} else {
 									break
 								}
 
-								if len(elem) == 0 {
-									// Leaf node.
-									switch method {
-									case "GET":
-										r.name = GetConnectorConfigOperation
-										r.summary = "Get the configuration for the specified connector"
-										r.operationID = "getConnectorConfig"
-										r.pathPattern = "/connectors/{connector}/config"
-										r.args = args
-										r.count = 1
-										return r, true
-									case "PUT":
-										r.name = PutConnectorConfigOperation
-										r.summary = "Create or reconfigure the specified connector"
-										r.operationID = "putConnectorConfig"
-										r.pathPattern = "/connectors/{connector}/config"
-										r.args = args
-										r.count = 1
-										return r, true
-									default:
-										return
-									}
+								// Param: "task"
+								// Match until "/"
+								idx := strings.IndexByte(elem, '/')
+								if idx < 0 {
+									idx = len(elem)
 								}
-
-							case 'o': // Prefix: "offsets"
-
-								if l := len("offsets"); len(elem) >= l && elem[0:l] == "offsets" {
-									elem = elem[l:]
-								} else {
-									break
-								}
-
-								if len(elem) == 0 {
-									// Leaf node.
-									switch method {
-									case "GET":
-										r.name = GetOffsetsOperation
-										r.summary = "Get the current offsets for the specified connector"
-										r.operationID = "getOffsets"
-										r.pathPattern = "/connectors/{connector}/offsets"
-										r.args = args
-										r.count = 1
-										return r, true
-									default:
-										return
-									}
-								}
-
-							case 's': // Prefix: "status"
-
-								if l := len("status"); len(elem) >= l && elem[0:l] == "status" {
-									elem = elem[l:]
-								} else {
-									break
-								}
-
-								if len(elem) == 0 {
-									// Leaf node.
-									switch method {
-									case "GET":
-										r.name = GetConnectorStatusOperation
-										r.summary = "Get the status for the specified connector"
-										r.operationID = "getConnectorStatus"
-										r.pathPattern = "/connectors/{connector}/status"
-										r.args = args
-										r.count = 1
-										return r, true
-									default:
-										return
-									}
-								}
-
-							case 't': // Prefix: "t"
-
-								if l := len("t"); len(elem) >= l && elem[0:l] == "t" {
-									elem = elem[l:]
-								} else {
-									break
-								}
+								args[1] = elem[:idx]
+								elem = elem[idx:]
 
 								if len(elem) == 0 {
 									break
 								}
 								switch elem[0] {
-								case 'a': // Prefix: "asks"
+								case '/': // Prefix: "/status"
 
-									if l := len("asks"); len(elem) >= l && elem[0:l] == "asks" {
-										elem = elem[l:]
-									} else {
-										break
-									}
-
-									if len(elem) == 0 {
-										switch method {
-										case "GET":
-											r.name = GetTaskConfigsOperation
-											r.summary = "List all tasks and their configurations for the specified connector"
-											r.operationID = "getTaskConfigs"
-											r.pathPattern = "/connectors/{connector}/tasks"
-											r.args = args
-											r.count = 1
-											return r, true
-										default:
-											return
-										}
-									}
-									switch elem[0] {
-									case '-': // Prefix: "-config"
-
-										if l := len("-config"); len(elem) >= l && elem[0:l] == "-config" {
-											elem = elem[l:]
-										} else {
-											break
-										}
-
-										if len(elem) == 0 {
-											// Leaf node.
-											switch method {
-											case "GET":
-												r.name = GetTasksConfigOperation
-												r.summary = "Get the configuration of all tasks for the specified connector"
-												r.operationID = "getTasksConfig"
-												r.pathPattern = "/connectors/{connector}/tasks-config"
-												r.args = args
-												r.count = 1
-												return r, true
-											default:
-												return
-											}
-										}
-
-									case '/': // Prefix: "/"
-
-										if l := len("/"); len(elem) >= l && elem[0:l] == "/" {
-											elem = elem[l:]
-										} else {
-											break
-										}
-
-										// Param: "task"
-										// Match until "/"
-										idx := strings.IndexByte(elem, '/')
-										if idx < 0 {
-											idx = len(elem)
-										}
-										args[1] = elem[:idx]
-										elem = elem[idx:]
-
-										if len(elem) == 0 {
-											break
-										}
-										switch elem[0] {
-										case '/': // Prefix: "/status"
-
-											if l := len("/status"); len(elem) >= l && elem[0:l] == "/status" {
-												elem = elem[l:]
-											} else {
-												break
-											}
-
-											if len(elem) == 0 {
-												// Leaf node.
-												switch method {
-												case "GET":
-													r.name = GetTaskStatusOperation
-													r.summary = "Get the state of the specified task for the specified connector"
-													r.operationID = "getTaskStatus"
-													r.pathPattern = "/connectors/{connector}/tasks/{task}/status"
-													r.args = args
-													r.count = 2
-													return r, true
-												default:
-													return
-												}
-											}
-
-										}
-
-									}
-
-								case 'o': // Prefix: "opics"
-
-									if l := len("opics"); len(elem) >= l && elem[0:l] == "opics" {
+									if l := len("/status"); len(elem) >= l && elem[0:l] == "/status" {
 										elem = elem[l:]
 									} else {
 										break
@@ -926,12 +738,12 @@ func (s *Server) FindPath(method string, u *url.URL) (r Route, _ bool) {
 										// Leaf node.
 										switch method {
 										case "GET":
-											r.name = GetConnectorActiveTopicsOperation
-											r.summary = "Get the list of topics actively used by the specified connector"
-											r.operationID = "getConnectorActiveTopics"
-											r.pathPattern = "/connectors/{connector}/topics"
+											r.name = GetTaskStatusOperation
+											r.summary = "Get the state of the specified task for the specified connector"
+											r.operationID = "getTaskStatus"
+											r.pathPattern = "/connectors/{connector}/tasks/{task}/status"
 											r.args = args
-											r.count = 1
+											r.count = 2
 											return r, true
 										default:
 											return

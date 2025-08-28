@@ -8,24 +8,12 @@ import (
 
 // Handler handles operations described by OpenAPI v3 specification.
 type Handler interface {
-	// CreateConnector implements createConnector operation.
-	//
-	// Create a new connector.
-	//
-	// POST /connectors
-	CreateConnector(ctx context.Context, req OptCreateConnectorRequest) (*ConnectorInfoStatusCode, error)
 	// GetConnector implements getConnector operation.
 	//
 	// Get the details for the specified connector.
 	//
 	// GET /connectors/{connector}
 	GetConnector(ctx context.Context, params GetConnectorParams) (*ConnectorInfoStatusCode, error)
-	// GetConnectorActiveTopics implements getConnectorActiveTopics operation.
-	//
-	// Get the list of topics actively used by the specified connector.
-	//
-	// GET /connectors/{connector}/topics
-	GetConnectorActiveTopics(ctx context.Context, params GetConnectorActiveTopicsParams) (*ConnectorActiveTopicsStatusCode, error)
 	// GetConnectorConfig implements getConnectorConfig operation.
 	//
 	// Get the configuration for the specified connector.
@@ -62,32 +50,12 @@ type Handler interface {
 	//
 	// GET /connectors/{connector}/tasks/{task}/status
 	GetTaskStatus(ctx context.Context, params GetTaskStatusParams) (*TaskStateStatusCode, error)
-	// GetTasksConfig implements getTasksConfig operation.
-	//
-	// Get the configuration of all tasks for the specified connector.
-	//
-	// Deprecated: schema marks this operation as deprecated.
-	//
-	// GET /connectors/{connector}/tasks-config
-	GetTasksConfig(ctx context.Context, params GetTasksConfigParams) (*GetTasksConfigDefStatusCode, error)
 	// ListConnectorPlugins implements listConnectorPlugins operation.
 	//
 	// List all connector plugins installed.
 	//
 	// GET /connector-plugins
 	ListConnectorPlugins(ctx context.Context, params ListConnectorPluginsParams) (*ListConnectorPluginsDefStatusCode, error)
-	// ListConnectors implements listConnectors operation.
-	//
-	// List all active connectors.
-	//
-	// GET /connectors
-	ListConnectors(ctx context.Context) (*ListConnectorsDefStatusCode, error)
-	// PutConnectorConfig implements putConnectorConfig operation.
-	//
-	// Create or reconfigure the specified connector.
-	//
-	// PUT /connectors/{connector}/config
-	PutConnectorConfig(ctx context.Context, req OptConnectorConfig, params PutConnectorConfigParams) (*ConnectorInfoStatusCode, error)
 	// ServerInfo implements serverInfo operation.
 	//
 	// Get details about this Connect worker and the ID of the Kafka cluster it is connected to.

@@ -301,70 +301,6 @@ func (s *ConfigValueInfo) SetVisible(val OptBool) {
 	s.Visible = val
 }
 
-// Ref: #/components/schemas/ConnectorActiveTopics
-type ConnectorActiveTopics map[string]ConnectorActiveTopicsItem
-
-func (s *ConnectorActiveTopics) init() ConnectorActiveTopics {
-	m := *s
-	if m == nil {
-		m = map[string]ConnectorActiveTopicsItem{}
-		*s = m
-	}
-	return m
-}
-
-type ConnectorActiveTopicsItem struct {
-	Topics []string `json:"topics"`
-}
-
-// GetTopics returns the value of Topics.
-func (s *ConnectorActiveTopicsItem) GetTopics() []string {
-	return s.Topics
-}
-
-// SetTopics sets the value of Topics.
-func (s *ConnectorActiveTopicsItem) SetTopics(val []string) {
-	s.Topics = val
-}
-
-// ConnectorActiveTopicsStatusCode wraps ConnectorActiveTopics with StatusCode.
-type ConnectorActiveTopicsStatusCode struct {
-	StatusCode int
-	Response   ConnectorActiveTopics
-}
-
-// GetStatusCode returns the value of StatusCode.
-func (s *ConnectorActiveTopicsStatusCode) GetStatusCode() int {
-	return s.StatusCode
-}
-
-// GetResponse returns the value of Response.
-func (s *ConnectorActiveTopicsStatusCode) GetResponse() ConnectorActiveTopics {
-	return s.Response
-}
-
-// SetStatusCode sets the value of StatusCode.
-func (s *ConnectorActiveTopicsStatusCode) SetStatusCode(val int) {
-	s.StatusCode = val
-}
-
-// SetResponse sets the value of Response.
-func (s *ConnectorActiveTopicsStatusCode) SetResponse(val ConnectorActiveTopics) {
-	s.Response = val
-}
-
-// Ref: #/components/schemas/ConnectorConfig
-type ConnectorConfig map[string]string
-
-func (s *ConnectorConfig) init() ConnectorConfig {
-	m := *s
-	if m == nil {
-		m = map[string]string{}
-		*s = m
-	}
-	return m
-}
-
 // Ref: #/components/schemas/ConnectorInfo
 type ConnectorInfo struct {
 	Config OptConnectorInfoConfig `json:"config"`
@@ -787,91 +723,6 @@ func (s *ConnectorTaskId) SetTask(val OptInt32) {
 	s.Task = val
 }
 
-// Ref: #/components/schemas/CreateConnectorRequest
-type CreateConnectorRequest struct {
-	Config       OptConnectorConfig                    `json:"config"`
-	InitialState OptCreateConnectorRequestInitialState `json:"initial_state"`
-	Name         OptString                             `json:"name"`
-}
-
-// GetConfig returns the value of Config.
-func (s *CreateConnectorRequest) GetConfig() OptConnectorConfig {
-	return s.Config
-}
-
-// GetInitialState returns the value of InitialState.
-func (s *CreateConnectorRequest) GetInitialState() OptCreateConnectorRequestInitialState {
-	return s.InitialState
-}
-
-// GetName returns the value of Name.
-func (s *CreateConnectorRequest) GetName() OptString {
-	return s.Name
-}
-
-// SetConfig sets the value of Config.
-func (s *CreateConnectorRequest) SetConfig(val OptConnectorConfig) {
-	s.Config = val
-}
-
-// SetInitialState sets the value of InitialState.
-func (s *CreateConnectorRequest) SetInitialState(val OptCreateConnectorRequestInitialState) {
-	s.InitialState = val
-}
-
-// SetName sets the value of Name.
-func (s *CreateConnectorRequest) SetName(val OptString) {
-	s.Name = val
-}
-
-type CreateConnectorRequestInitialState string
-
-const (
-	CreateConnectorRequestInitialStateRUNNING CreateConnectorRequestInitialState = "RUNNING"
-	CreateConnectorRequestInitialStatePAUSED  CreateConnectorRequestInitialState = "PAUSED"
-	CreateConnectorRequestInitialStateSTOPPED CreateConnectorRequestInitialState = "STOPPED"
-)
-
-// AllValues returns all CreateConnectorRequestInitialState values.
-func (CreateConnectorRequestInitialState) AllValues() []CreateConnectorRequestInitialState {
-	return []CreateConnectorRequestInitialState{
-		CreateConnectorRequestInitialStateRUNNING,
-		CreateConnectorRequestInitialStatePAUSED,
-		CreateConnectorRequestInitialStateSTOPPED,
-	}
-}
-
-// MarshalText implements encoding.TextMarshaler.
-func (s CreateConnectorRequestInitialState) MarshalText() ([]byte, error) {
-	switch s {
-	case CreateConnectorRequestInitialStateRUNNING:
-		return []byte(s), nil
-	case CreateConnectorRequestInitialStatePAUSED:
-		return []byte(s), nil
-	case CreateConnectorRequestInitialStateSTOPPED:
-		return []byte(s), nil
-	default:
-		return nil, errors.Errorf("invalid value: %q", s)
-	}
-}
-
-// UnmarshalText implements encoding.TextUnmarshaler.
-func (s *CreateConnectorRequestInitialState) UnmarshalText(data []byte) error {
-	switch CreateConnectorRequestInitialState(data) {
-	case CreateConnectorRequestInitialStateRUNNING:
-		*s = CreateConnectorRequestInitialStateRUNNING
-		return nil
-	case CreateConnectorRequestInitialStatePAUSED:
-		*s = CreateConnectorRequestInitialStatePAUSED
-		return nil
-	case CreateConnectorRequestInitialStateSTOPPED:
-		*s = CreateConnectorRequestInitialStateSTOPPED
-		return nil
-	default:
-		return errors.Errorf("invalid value: %q", data)
-	}
-}
-
 type GetConnectorConfigDef map[string]string
 
 func (s *GetConnectorConfigDef) init() GetConnectorConfigDef {
@@ -961,54 +812,6 @@ func (s *GetTaskConfigsDefStatusCode) SetResponse(val []TaskInfo) {
 	s.Response = val
 }
 
-type GetTasksConfigDef map[string]GetTasksConfigDefItem
-
-func (s *GetTasksConfigDef) init() GetTasksConfigDef {
-	m := *s
-	if m == nil {
-		m = map[string]GetTasksConfigDefItem{}
-		*s = m
-	}
-	return m
-}
-
-type GetTasksConfigDefItem map[string]string
-
-func (s *GetTasksConfigDefItem) init() GetTasksConfigDefItem {
-	m := *s
-	if m == nil {
-		m = map[string]string{}
-		*s = m
-	}
-	return m
-}
-
-// GetTasksConfigDefStatusCode wraps GetTasksConfigDef with StatusCode.
-type GetTasksConfigDefStatusCode struct {
-	StatusCode int
-	Response   GetTasksConfigDef
-}
-
-// GetStatusCode returns the value of StatusCode.
-func (s *GetTasksConfigDefStatusCode) GetStatusCode() int {
-	return s.StatusCode
-}
-
-// GetResponse returns the value of Response.
-func (s *GetTasksConfigDefStatusCode) GetResponse() GetTasksConfigDef {
-	return s.Response
-}
-
-// SetStatusCode sets the value of StatusCode.
-func (s *GetTasksConfigDefStatusCode) SetStatusCode(val int) {
-	s.StatusCode = val
-}
-
-// SetResponse sets the value of Response.
-func (s *GetTasksConfigDefStatusCode) SetResponse(val GetTasksConfigDef) {
-	s.Response = val
-}
-
 // ListConnectorPluginsDefStatusCode wraps []PluginInfo with StatusCode.
 type ListConnectorPluginsDefStatusCode struct {
 	StatusCode int
@@ -1032,32 +835,6 @@ func (s *ListConnectorPluginsDefStatusCode) SetStatusCode(val int) {
 
 // SetResponse sets the value of Response.
 func (s *ListConnectorPluginsDefStatusCode) SetResponse(val []PluginInfo) {
-	s.Response = val
-}
-
-// ListConnectorsDefStatusCode wraps []string with StatusCode.
-type ListConnectorsDefStatusCode struct {
-	StatusCode int
-	Response   []string
-}
-
-// GetStatusCode returns the value of StatusCode.
-func (s *ListConnectorsDefStatusCode) GetStatusCode() int {
-	return s.StatusCode
-}
-
-// GetResponse returns the value of Response.
-func (s *ListConnectorsDefStatusCode) GetResponse() []string {
-	return s.Response
-}
-
-// SetStatusCode sets the value of StatusCode.
-func (s *ListConnectorsDefStatusCode) SetStatusCode(val int) {
-	s.StatusCode = val
-}
-
-// SetResponse sets the value of Response.
-func (s *ListConnectorsDefStatusCode) SetResponse(val []string) {
 	s.Response = val
 }
 
@@ -1193,52 +970,6 @@ func (o OptConfigValueInfo) Get() (v ConfigValueInfo, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptConfigValueInfo) Or(d ConfigValueInfo) ConfigValueInfo {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptConnectorConfig returns new OptConnectorConfig with value set to v.
-func NewOptConnectorConfig(v ConnectorConfig) OptConnectorConfig {
-	return OptConnectorConfig{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptConnectorConfig is optional ConnectorConfig.
-type OptConnectorConfig struct {
-	Value ConnectorConfig
-	Set   bool
-}
-
-// IsSet returns true if OptConnectorConfig was set.
-func (o OptConnectorConfig) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptConnectorConfig) Reset() {
-	var v ConnectorConfig
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptConnectorConfig) SetTo(v ConnectorConfig) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptConnectorConfig) Get() (v ConnectorConfig, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptConnectorConfig) Or(d ConnectorConfig) ConnectorConfig {
 	if v, ok := o.Get(); ok {
 		return v
 	}
@@ -1561,98 +1292,6 @@ func (o OptConnectorTaskId) Get() (v ConnectorTaskId, ok bool) {
 
 // Or returns value if set, or given parameter if does not.
 func (o OptConnectorTaskId) Or(d ConnectorTaskId) ConnectorTaskId {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptCreateConnectorRequest returns new OptCreateConnectorRequest with value set to v.
-func NewOptCreateConnectorRequest(v CreateConnectorRequest) OptCreateConnectorRequest {
-	return OptCreateConnectorRequest{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptCreateConnectorRequest is optional CreateConnectorRequest.
-type OptCreateConnectorRequest struct {
-	Value CreateConnectorRequest
-	Set   bool
-}
-
-// IsSet returns true if OptCreateConnectorRequest was set.
-func (o OptCreateConnectorRequest) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptCreateConnectorRequest) Reset() {
-	var v CreateConnectorRequest
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptCreateConnectorRequest) SetTo(v CreateConnectorRequest) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptCreateConnectorRequest) Get() (v CreateConnectorRequest, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptCreateConnectorRequest) Or(d CreateConnectorRequest) CreateConnectorRequest {
-	if v, ok := o.Get(); ok {
-		return v
-	}
-	return d
-}
-
-// NewOptCreateConnectorRequestInitialState returns new OptCreateConnectorRequestInitialState with value set to v.
-func NewOptCreateConnectorRequestInitialState(v CreateConnectorRequestInitialState) OptCreateConnectorRequestInitialState {
-	return OptCreateConnectorRequestInitialState{
-		Value: v,
-		Set:   true,
-	}
-}
-
-// OptCreateConnectorRequestInitialState is optional CreateConnectorRequestInitialState.
-type OptCreateConnectorRequestInitialState struct {
-	Value CreateConnectorRequestInitialState
-	Set   bool
-}
-
-// IsSet returns true if OptCreateConnectorRequestInitialState was set.
-func (o OptCreateConnectorRequestInitialState) IsSet() bool { return o.Set }
-
-// Reset unsets value.
-func (o *OptCreateConnectorRequestInitialState) Reset() {
-	var v CreateConnectorRequestInitialState
-	o.Value = v
-	o.Set = false
-}
-
-// SetTo sets value to v.
-func (o *OptCreateConnectorRequestInitialState) SetTo(v CreateConnectorRequestInitialState) {
-	o.Set = true
-	o.Value = v
-}
-
-// Get returns value and boolean that denotes whether value was set.
-func (o OptCreateConnectorRequestInitialState) Get() (v CreateConnectorRequestInitialState, ok bool) {
-	if !o.Set {
-		return v, false
-	}
-	return o.Value, true
-}
-
-// Or returns value if set, or given parameter if does not.
-func (o OptCreateConnectorRequestInitialState) Or(d CreateConnectorRequestInitialState) CreateConnectorRequestInitialState {
 	if v, ok := o.Get(); ok {
 		return v
 	}

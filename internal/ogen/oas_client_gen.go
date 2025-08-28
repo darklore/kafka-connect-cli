@@ -28,24 +28,12 @@ func trimTrailingSlashes(u *url.URL) {
 
 // Invoker invokes operations described by OpenAPI v3 specification.
 type Invoker interface {
-	// CreateConnector invokes createConnector operation.
-	//
-	// Create a new connector.
-	//
-	// POST /connectors
-	CreateConnector(ctx context.Context, request OptCreateConnectorRequest) (*ConnectorInfoStatusCode, error)
 	// GetConnector invokes getConnector operation.
 	//
 	// Get the details for the specified connector.
 	//
 	// GET /connectors/{connector}
 	GetConnector(ctx context.Context, params GetConnectorParams) (*ConnectorInfoStatusCode, error)
-	// GetConnectorActiveTopics invokes getConnectorActiveTopics operation.
-	//
-	// Get the list of topics actively used by the specified connector.
-	//
-	// GET /connectors/{connector}/topics
-	GetConnectorActiveTopics(ctx context.Context, params GetConnectorActiveTopicsParams) (*ConnectorActiveTopicsStatusCode, error)
 	// GetConnectorConfig invokes getConnectorConfig operation.
 	//
 	// Get the configuration for the specified connector.
@@ -82,32 +70,12 @@ type Invoker interface {
 	//
 	// GET /connectors/{connector}/tasks/{task}/status
 	GetTaskStatus(ctx context.Context, params GetTaskStatusParams) (*TaskStateStatusCode, error)
-	// GetTasksConfig invokes getTasksConfig operation.
-	//
-	// Get the configuration of all tasks for the specified connector.
-	//
-	// Deprecated: schema marks this operation as deprecated.
-	//
-	// GET /connectors/{connector}/tasks-config
-	GetTasksConfig(ctx context.Context, params GetTasksConfigParams) (*GetTasksConfigDefStatusCode, error)
 	// ListConnectorPlugins invokes listConnectorPlugins operation.
 	//
 	// List all connector plugins installed.
 	//
 	// GET /connector-plugins
 	ListConnectorPlugins(ctx context.Context, params ListConnectorPluginsParams) (*ListConnectorPluginsDefStatusCode, error)
-	// ListConnectors invokes listConnectors operation.
-	//
-	// List all active connectors.
-	//
-	// GET /connectors
-	ListConnectors(ctx context.Context) (*ListConnectorsDefStatusCode, error)
-	// PutConnectorConfig invokes putConnectorConfig operation.
-	//
-	// Create or reconfigure the specified connector.
-	//
-	// PUT /connectors/{connector}/config
-	PutConnectorConfig(ctx context.Context, request OptConnectorConfig, params PutConnectorConfigParams) (*ConnectorInfoStatusCode, error)
 	// ServerInfo invokes serverInfo operation.
 	//
 	// Get details about this Connect worker and the ID of the Kafka cluster it is connected to.
@@ -164,81 +132,6 @@ func (c *Client) requestURL(ctx context.Context) *url.URL {
 		return c.serverURL
 	}
 	return u
-}
-
-// CreateConnector invokes createConnector operation.
-//
-// Create a new connector.
-//
-// POST /connectors
-func (c *Client) CreateConnector(ctx context.Context, request OptCreateConnectorRequest) (*ConnectorInfoStatusCode, error) {
-	res, err := c.sendCreateConnector(ctx, request)
-	return res, err
-}
-
-func (c *Client) sendCreateConnector(ctx context.Context, request OptCreateConnectorRequest) (res *ConnectorInfoStatusCode, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("createConnector"),
-		semconv.HTTPRequestMethodKey.String("POST"),
-		semconv.HTTPRouteKey.String("/connectors"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, CreateConnectorOperation,
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/connectors"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "POST", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-	if err := encodeCreateConnectorRequest(request, r); err != nil {
-		return res, errors.Wrap(err, "encode request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeCreateConnectorResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
 }
 
 // GetConnector invokes getConnector operation.
@@ -324,97 +217,6 @@ func (c *Client) sendGetConnector(ctx context.Context, params GetConnectorParams
 
 	stage = "DecodeResponse"
 	result, err := decodeGetConnectorResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// GetConnectorActiveTopics invokes getConnectorActiveTopics operation.
-//
-// Get the list of topics actively used by the specified connector.
-//
-// GET /connectors/{connector}/topics
-func (c *Client) GetConnectorActiveTopics(ctx context.Context, params GetConnectorActiveTopicsParams) (*ConnectorActiveTopicsStatusCode, error) {
-	res, err := c.sendGetConnectorActiveTopics(ctx, params)
-	return res, err
-}
-
-func (c *Client) sendGetConnectorActiveTopics(ctx context.Context, params GetConnectorActiveTopicsParams) (res *ConnectorActiveTopicsStatusCode, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getConnectorActiveTopics"),
-		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/connectors/{connector}/topics"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, GetConnectorActiveTopicsOperation,
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [3]string
-	pathParts[0] = "/connectors/"
-	{
-		// Encode "connector" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "connector",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.Connector))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/topics"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeGetConnectorActiveTopicsResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}
@@ -987,99 +789,6 @@ func (c *Client) sendGetTaskStatus(ctx context.Context, params GetTaskStatusPara
 	return result, nil
 }
 
-// GetTasksConfig invokes getTasksConfig operation.
-//
-// Get the configuration of all tasks for the specified connector.
-//
-// Deprecated: schema marks this operation as deprecated.
-//
-// GET /connectors/{connector}/tasks-config
-func (c *Client) GetTasksConfig(ctx context.Context, params GetTasksConfigParams) (*GetTasksConfigDefStatusCode, error) {
-	res, err := c.sendGetTasksConfig(ctx, params)
-	return res, err
-}
-
-func (c *Client) sendGetTasksConfig(ctx context.Context, params GetTasksConfigParams) (res *GetTasksConfigDefStatusCode, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("getTasksConfig"),
-		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/connectors/{connector}/tasks-config"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, GetTasksConfigOperation,
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [3]string
-	pathParts[0] = "/connectors/"
-	{
-		// Encode "connector" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "connector",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.Connector))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/tasks-config"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeGetTasksConfigResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
 // ListConnectorPlugins invokes listConnectorPlugins operation.
 //
 // List all connector plugins installed.
@@ -1166,172 +875,6 @@ func (c *Client) sendListConnectorPlugins(ctx context.Context, params ListConnec
 
 	stage = "DecodeResponse"
 	result, err := decodeListConnectorPluginsResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// ListConnectors invokes listConnectors operation.
-//
-// List all active connectors.
-//
-// GET /connectors
-func (c *Client) ListConnectors(ctx context.Context) (*ListConnectorsDefStatusCode, error) {
-	res, err := c.sendListConnectors(ctx)
-	return res, err
-}
-
-func (c *Client) sendListConnectors(ctx context.Context) (res *ListConnectorsDefStatusCode, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("listConnectors"),
-		semconv.HTTPRequestMethodKey.String("GET"),
-		semconv.HTTPRouteKey.String("/connectors"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, ListConnectorsOperation,
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [1]string
-	pathParts[0] = "/connectors"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "GET", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodeListConnectorsResponse(resp)
-	if err != nil {
-		return res, errors.Wrap(err, "decode response")
-	}
-
-	return result, nil
-}
-
-// PutConnectorConfig invokes putConnectorConfig operation.
-//
-// Create or reconfigure the specified connector.
-//
-// PUT /connectors/{connector}/config
-func (c *Client) PutConnectorConfig(ctx context.Context, request OptConnectorConfig, params PutConnectorConfigParams) (*ConnectorInfoStatusCode, error) {
-	res, err := c.sendPutConnectorConfig(ctx, request, params)
-	return res, err
-}
-
-func (c *Client) sendPutConnectorConfig(ctx context.Context, request OptConnectorConfig, params PutConnectorConfigParams) (res *ConnectorInfoStatusCode, err error) {
-	otelAttrs := []attribute.KeyValue{
-		otelogen.OperationID("putConnectorConfig"),
-		semconv.HTTPRequestMethodKey.String("PUT"),
-		semconv.HTTPRouteKey.String("/connectors/{connector}/config"),
-	}
-
-	// Run stopwatch.
-	startTime := time.Now()
-	defer func() {
-		// Use floating point division here for higher precision (instead of Millisecond method).
-		elapsedDuration := time.Since(startTime)
-		c.duration.Record(ctx, float64(elapsedDuration)/float64(time.Millisecond), metric.WithAttributes(otelAttrs...))
-	}()
-
-	// Increment request counter.
-	c.requests.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-
-	// Start a span for this request.
-	ctx, span := c.cfg.Tracer.Start(ctx, PutConnectorConfigOperation,
-		trace.WithAttributes(otelAttrs...),
-		clientSpanKind,
-	)
-	// Track stage for error reporting.
-	var stage string
-	defer func() {
-		if err != nil {
-			span.RecordError(err)
-			span.SetStatus(codes.Error, stage)
-			c.errors.Add(ctx, 1, metric.WithAttributes(otelAttrs...))
-		}
-		span.End()
-	}()
-
-	stage = "BuildURL"
-	u := uri.Clone(c.requestURL(ctx))
-	var pathParts [3]string
-	pathParts[0] = "/connectors/"
-	{
-		// Encode "connector" parameter.
-		e := uri.NewPathEncoder(uri.PathEncoderConfig{
-			Param:   "connector",
-			Style:   uri.PathStyleSimple,
-			Explode: false,
-		})
-		if err := func() error {
-			return e.EncodeValue(conv.StringToString(params.Connector))
-		}(); err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		encoded, err := e.Result()
-		if err != nil {
-			return res, errors.Wrap(err, "encode path")
-		}
-		pathParts[1] = encoded
-	}
-	pathParts[2] = "/config"
-	uri.AddPathParts(u, pathParts[:]...)
-
-	stage = "EncodeRequest"
-	r, err := ht.NewRequest(ctx, "PUT", u)
-	if err != nil {
-		return res, errors.Wrap(err, "create request")
-	}
-	if err := encodePutConnectorConfigRequest(request, r); err != nil {
-		return res, errors.Wrap(err, "encode request")
-	}
-
-	stage = "SendRequest"
-	resp, err := c.cfg.Client.Do(r)
-	if err != nil {
-		return res, errors.Wrap(err, "do request")
-	}
-	defer resp.Body.Close()
-
-	stage = "DecodeResponse"
-	result, err := decodePutConnectorConfigResponse(resp)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

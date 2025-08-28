@@ -140,49 +140,6 @@ func (s ConnectorStateInfoType) Validate() error {
 	}
 }
 
-func (s *CreateConnectorRequest) Validate() error {
-	if s == nil {
-		return validate.ErrNilPointer
-	}
-
-	var failures []validate.FieldError
-	if err := func() error {
-		if value, ok := s.InitialState.Get(); ok {
-			if err := func() error {
-				if err := value.Validate(); err != nil {
-					return err
-				}
-				return nil
-			}(); err != nil {
-				return err
-			}
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "initial_state",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
-func (s CreateConnectorRequestInitialState) Validate() error {
-	switch s {
-	case "RUNNING":
-		return nil
-	case "PAUSED":
-		return nil
-	case "STOPPED":
-		return nil
-	default:
-		return errors.Errorf("invalid value: %v", s)
-	}
-}
-
 func (s *GetConnectorConfigDefDefStatusCode) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
@@ -230,29 +187,6 @@ func (s *GetTaskConfigsDefStatusCode) Validate() error {
 }
 
 func (s *ListConnectorPluginsDefStatusCode) Validate() error {
-	if s == nil {
-		return validate.ErrNilPointer
-	}
-
-	var failures []validate.FieldError
-	if err := func() error {
-		if s.Response == nil {
-			return errors.New("nil is invalid value")
-		}
-		return nil
-	}(); err != nil {
-		failures = append(failures, validate.FieldError{
-			Name:  "Response",
-			Error: err,
-		})
-	}
-	if len(failures) > 0 {
-		return &validate.Error{Fields: failures}
-	}
-	return nil
-}
-
-func (s *ListConnectorsDefStatusCode) Validate() error {
 	if s == nil {
 		return validate.ErrNilPointer
 	}
