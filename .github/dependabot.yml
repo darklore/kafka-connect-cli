@@ -5,9 +5,17 @@ updates:
     schedule:
       day: "sunday"
       interval: "weekly"
+    cooldown:
+      default-days: 7
     groups:
-      all:
+      major:
         patterns:
           - "*"
-    reviewers:
-      - "darklore"
+        update-types:
+          - major
+      minor-and-patch:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
